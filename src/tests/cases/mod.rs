@@ -1,0 +1,42 @@
+use super::*;
+
+mod demo_app;
+mod demo_const;
+mod demo_derive_eq;
+mod demo_enum;
+mod demo_keyword;
+mod demo_order;
+mod demo_trait;
+
+mod fn_basic;
+mod fn_basic_void;
+mod fn_box_in;
+mod fn_box_out;
+mod fn_combo_in;
+mod fn_combo_out;
+mod fn_enum_in;
+mod fn_enum_out;
+mod fn_nested_in;
+mod fn_nested_out;
+mod fn_option_in;
+mod fn_option_out;
+mod fn_payload_in;
+mod fn_payload_out;
+mod fn_string;
+mod fn_struct_in;
+mod fn_struct_out;
+mod fn_tuple_in;
+mod fn_tuple_out;
+mod fn_vec_in;
+mod fn_vec_out;
+
+mod trait_enum;
+mod trait_export;
+mod trait_export_import;
+mod trait_export_nested;
+mod trait_import;
+mod trait_import_export;
+mod trait_import_nested;
+mod trait_import_struct_in;
+mod trait_import_tuple_in;
+mod trait_string;

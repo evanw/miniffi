@@ -1,0 +1,12 @@
+[package]
+name = "miniffi"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/evanw/miniffi"
+description = "A simple but opinionated FFI system"
+exclude = ["src/tests"]
+
+[dependencies]
+proc-macro2 = { version = "1.0.60", features = ["span-locations"] }
+syn = { version = "2.0.0", default-features = false, features = ["full", "parsing", "printing"] }
