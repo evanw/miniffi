@@ -428,7 +428,11 @@ impl FnBuilder {
         // Inline in reverse so we pop the stack of args that were pushed earlier
         let mut parts = Vec::new();
         for (f, name) in fields.iter().rev().zip(names.iter().rev()) {
-            parts.push(format!("{}: {}", f.name, self.find(name, &f.ty, kind).code));
+            let code = self.find(name, &f.ty, kind).code;
+            parts.push(match f.name.as_str() {
+                "" => code,
+                _ => format!("{}: {}", f.name, code),
+            });
         }
         parts.reverse();
 

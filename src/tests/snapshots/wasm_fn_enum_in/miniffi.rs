@@ -42,23 +42,23 @@ fn _ffi_enum_LongEnum_from_js(end: &mut *const u8) -> LongEnum {
         1 => LongEnum::ShortTuple(_ffi_read::<i32>(end)),
         2 => LongEnum::ShortStruct { a: _ffi_read::<i32>(end) },
         3 => LongEnum::LongTuple(
-_ffi_read::<i32>(end),
-_ffi_read::<i32>(end),
-_ffi_read::<i32>(end),
-_ffi_read::<i32>(end),
-_ffi_read::<i32>(end),
-_ffi_read::<i32>(end),
-_ffi_read::<i32>(end),
-_ffi_read::<i32>(end)
-),
+            _ffi_read::<i32>(end),
+            _ffi_read::<i32>(end),
+            _ffi_read::<i32>(end),
+            _ffi_read::<i32>(end),
+            _ffi_read::<i32>(end),
+            _ffi_read::<i32>(end),
+            _ffi_read::<i32>(end),
+            _ffi_read::<i32>(end)
+        ),
         4 => LongEnum::LongStruct {
-a: _ffi_read::<i32>(end),
-b: _ffi_read::<i32>(end),
-c: _ffi_read::<i32>(end),
-d: _ffi_read::<i32>(end),
-e: _ffi_read::<i32>(end),
-f: _ffi_read::<i32>(end)
-},
+            a: _ffi_read::<i32>(end),
+            b: _ffi_read::<i32>(end),
+            c: _ffi_read::<i32>(end),
+            d: _ffi_read::<i32>(end),
+            e: _ffi_read::<i32>(end),
+            f: _ffi_read::<i32>(end)
+        },
         _ => panic!(),
     }
 }

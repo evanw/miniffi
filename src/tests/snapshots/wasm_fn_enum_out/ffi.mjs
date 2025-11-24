@@ -62,8 +62,26 @@ function _ffi_enum_LongEnum_from_rust(buf) {
         case 0: return _ffi_enum_LongEnum__Empty;
         case 1: return { $: "ShortTuple", 0: _ffi_read_i32(buf) };
         case 2: return { $: "ShortStruct", a: _ffi_read_i32(buf) };
-        case 3: return { $: "LongTuple", 0: _ffi_read_i32(buf), 1: _ffi_read_i32(buf), 2: _ffi_read_i32(buf), 3: _ffi_read_i32(buf), 4: _ffi_read_i32(buf), 5: _ffi_read_i32(buf), 6: _ffi_read_i32(buf), 7: _ffi_read_i32(buf) };
-        case 4: return { $: "LongStruct", a: _ffi_read_i32(buf), b: _ffi_read_i32(buf), c: _ffi_read_i32(buf), d: _ffi_read_i32(buf), e: _ffi_read_i32(buf), f: _ffi_read_i32(buf) };
+        case 3: return {
+            $: "LongTuple",
+            0: _ffi_read_i32(buf),
+            1: _ffi_read_i32(buf),
+            2: _ffi_read_i32(buf),
+            3: _ffi_read_i32(buf),
+            4: _ffi_read_i32(buf),
+            5: _ffi_read_i32(buf),
+            6: _ffi_read_i32(buf),
+            7: _ffi_read_i32(buf)
+        };
+        case 4: return {
+            $: "LongStruct",
+            a: _ffi_read_i32(buf),
+            b: _ffi_read_i32(buf),
+            c: _ffi_read_i32(buf),
+            d: _ffi_read_i32(buf),
+            e: _ffi_read_i32(buf),
+            f: _ffi_read_i32(buf)
+        };
         default: throw Error();
     }
 }

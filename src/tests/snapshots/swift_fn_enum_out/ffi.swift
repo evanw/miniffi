@@ -54,8 +54,24 @@ private func _ffi_enum_LongEnum_from_rust(_ end: inout UnsafeRawPointer) -> Long
         case 0: return .Empty
         case 1: return .ShortTuple(_ffi_read(&end) as Int32)
         case 2: return .ShortStruct(a: _ffi_read(&end) as Int32)
-        case 3: return .LongTuple(_ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32)
-        case 4: return .LongStruct(a: _ffi_read(&end) as Int32, b: _ffi_read(&end) as Int32, c: _ffi_read(&end) as Int32, d: _ffi_read(&end) as Int32, e: _ffi_read(&end) as Int32, f: _ffi_read(&end) as Int32)
+        case 3: return .LongTuple(
+            _ffi_read(&end) as Int32,
+            _ffi_read(&end) as Int32,
+            _ffi_read(&end) as Int32,
+            _ffi_read(&end) as Int32,
+            _ffi_read(&end) as Int32,
+            _ffi_read(&end) as Int32,
+            _ffi_read(&end) as Int32,
+            _ffi_read(&end) as Int32
+        )
+        case 4: return .LongStruct(
+            a: _ffi_read(&end) as Int32,
+            b: _ffi_read(&end) as Int32,
+            c: _ffi_read(&end) as Int32,
+            d: _ffi_read(&end) as Int32,
+            e: _ffi_read(&end) as Int32,
+            f: _ffi_read(&end) as Int32
+        )
         default: fatalError()
     }
 }

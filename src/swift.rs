@@ -2199,23 +2199,24 @@ fn enum_to_rust_helper(ast: &AST, ctx: &mut SwiftCtx, enum_index: usize) -> (Str
         );
         _ = write!(rust, "    match _ffi_read::<i32>({end_name}) {{\n");
         for (v, branch) in e.variants.iter().zip(&mut branches) {
-            _ = write!(rust, "        {} => ", v.discriminant);
             let val_code = branch
                 .tfm
                 .rust
                 .find(&val_name, &RustType::Enum(enum_index), RefInline)
                 .code;
             if branch.tfm.rust.is_empty() {
-                _ = write!(rust, "{val_code},\n");
-                continue;
+                let val_code = format!("{} => {val_code},", v.discriminant);
+                branch.tfm.rust.line(val_code);
+                branch.tfm.rust.write_to_rust(ast, &mut rust, "        ");
+            } else {
+                _ = write!(rust, "        {} => {{", v.discriminant);
+                branch.tfm.rust.line(val_code);
+                branch
+                    .tfm
+                    .rust
+                    .write_to_rust(ast, &mut rust, "            ");
+                rust.push_str("        }\n");
             }
-            rust.push_str("{\n");
-            branch
-                .tfm
-                .rust
-                .write_to_rust(ast, &mut rust, "            ");
-            _ = write!(rust, "            {val_code}\n");
-            rust.push_str("        }\n");
         }
         rust.push_str("        _ => panic!(),\n");
         rust.push_str("    }\n");
@@ -2268,22 +2269,27 @@ fn enum_to_swift_helper(ast: &AST, ctx: &mut SwiftCtx, enum_index: usize) -> (St
             transform_to_swift(ast, ctx, &mut branch_locals, &mut tfm, &field_name, &f.ty);
             fields.push(field_name);
         }
-        let mut parts = Vec::new();
-        for (f, name) in v.fields.iter().zip(&fields).rev() {
-            let swift_code = tfm.swift.find(name, &f.ty, RefInline).code;
-            let mut part = String::new();
-            if !starts_with_digit(&f.name) {
-                _ = write!(part, "{}: ", f.name);
-            }
-            part.push_str(&swift_code);
-            parts.push(part);
-        }
-        parts.reverse();
+        let val_code = tfm.swift.find_fields(
+            &v.fields
+                .iter()
+                .map(|f| RustField {
+                    name: match starts_with_digit(&f.name) {
+                        false => f.name.clone(),
+                        true => "".to_string(),
+                    },
+                    ty: f.ty.clone(),
+                })
+                .collect(),
+            fields.iter().map(|x| Cow::Borrowed(x.as_str())).collect(),
+            RefInline,
+            "(",
+            ")",
+        );
         tfm.swift.decl(
             &val_name,
-            match parts.len() {
+            match v.fields.len() {
                 0 => format!(".{}", v.name),
-                _ => format!(".{}({})", v.name, parts.join(", ")),
+                _ => format!(".{}{}", v.name, val_code),
             },
         );
         branches.push(Branch { tfm, fields });
@@ -2357,22 +2363,22 @@ fn enum_to_swift_helper(ast: &AST, ctx: &mut SwiftCtx, enum_index: usize) -> (St
         );
         _ = write!(swift, "    switch _ffi_read(&{end_name}) as Int32 {{\n",);
         for (v, branch) in e.variants.iter().zip(&mut branches) {
-            _ = write!(swift, "        case {}:", v.discriminant);
             let val_code = branch
                 .tfm
                 .swift
                 .find(&val_name, &RustType::Enum(enum_index), RefInline)
                 .code;
             if branch.tfm.swift.is_empty() {
-                _ = write!(swift, " return {val_code}\n");
+                let val_code = format!("case {}: return {val_code}", v.discriminant);
+                branch.tfm.swift.line(val_code);
+                branch.tfm.swift.write_to_swift(ast, &mut swift, "        ");
             } else {
-                swift.push_str(" {\n");
+                _ = write!(swift, "        case {}:\n", v.discriminant);
+                branch.tfm.swift.line(format!("return {val_code}"));
                 branch
                     .tfm
                     .swift
                     .write_to_swift(ast, &mut swift, "            ");
-                _ = write!(swift, "            return {val_code}\n");
-                swift.push_str("        }\n");
             }
         }
         swift.push_str("        default: fatalError()\n");

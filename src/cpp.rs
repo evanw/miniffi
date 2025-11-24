@@ -2783,23 +2783,24 @@ fn enum_to_rust_helper(ast: &AST, ctx: &mut CppCtx, enum_index: usize) -> (Strin
         );
         _ = write!(rust, "    match _ffi_read::<i32>({end_name}) {{\n");
         for (v, branch) in e.variants.iter().zip(&mut branches) {
-            _ = write!(rust, "        {} => ", v.discriminant);
             let val_code = branch
                 .tfm
                 .rust
                 .find(&val_name, &RustType::Enum(enum_index), RefInline)
                 .code;
             if branch.tfm.rust.is_empty() {
-                _ = write!(rust, "{val_code},\n");
-                continue;
+                let val_code = format!("{} => {val_code},", v.discriminant);
+                branch.tfm.rust.line(val_code);
+                branch.tfm.rust.write_to_rust(ast, &mut rust, "        ");
+            } else {
+                _ = write!(rust, "        {} => {{", v.discriminant);
+                branch.tfm.rust.line(val_code);
+                branch
+                    .tfm
+                    .rust
+                    .write_to_rust(ast, &mut rust, "            ");
+                rust.push_str("        }\n");
             }
-            rust.push_str("{\n");
-            branch
-                .tfm
-                .rust
-                .write_to_rust(ast, &mut rust, "            ");
-            _ = write!(rust, "            {val_code}\n");
-            rust.push_str("        }\n");
         }
         rust.push_str("        _ => panic!(),\n");
         rust.push_str("    }\n");
@@ -2965,21 +2966,23 @@ fn enum_to_cpp_helper(ast: &AST, ctx: &mut CppCtx, enum_index: usize) -> (String
         );
         _ = write!(source, "    switch (_ffi_read<int32_t>({end_name})) {{\n",);
         for (v, branch) in e.variants.iter().zip(&mut branches) {
-            _ = write!(source, "    case {}:", v.discriminant);
             let val_code = branch
                 .tfm
                 .cpp
                 .find(&val_name, &RustType::Enum(enum_index), RefInline)
                 .code;
-            if branch.tfm.cpp.is_empty() {
-                _ = write!(source, "\n        return {val_code};\n");
+            let needs_block = !branch.tfm.cpp.is_empty();
+            branch.tfm.cpp.line(format!("return {val_code};"));
+            if needs_block {
+                _ = write!(source, "    case {}: {{\n", v.discriminant);
             } else {
-                source.push_str(" {\n");
-                branch
-                    .tfm
-                    .cpp
-                    .write_to_cpp(ctx, ast, &mut source_deps, &mut source, "        ");
-                _ = write!(source, "        return {val_code};\n");
+                _ = write!(source, "    case {}:\n", v.discriminant);
+            }
+            branch
+                .tfm
+                .cpp
+                .write_to_cpp(ctx, ast, &mut source_deps, &mut source, "        ");
+            if needs_block {
                 source.push_str("    }\n");
             }
         }

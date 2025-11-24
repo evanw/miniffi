@@ -2341,23 +2341,24 @@ fn enum_to_rust_helper(ast: &AST, ctx: &mut WasmCtx, enum_index: usize) -> (Stri
         );
         _ = write!(rust, "    match _ffi_read::<i32>({end_name}) {{\n");
         for (v, branch) in e.variants.iter().zip(&mut branches) {
-            _ = write!(rust, "        {} => ", v.discriminant);
             let val_code = branch
                 .tfm
                 .rust
                 .find(&val_name, &RustType::Enum(enum_index), RefInline)
                 .code;
             if branch.tfm.rust.is_empty() {
-                _ = write!(rust, "{val_code},\n");
-                continue;
+                let val_code = format!("{} => {val_code},", v.discriminant);
+                branch.tfm.rust.line(val_code);
+                branch.tfm.rust.write_to_rust(ast, &mut rust, "        ");
+            } else {
+                _ = write!(rust, "        {} => {{", v.discriminant);
+                branch.tfm.rust.line(val_code);
+                branch
+                    .tfm
+                    .rust
+                    .write_to_rust(ast, &mut rust, "            ");
+                rust.push_str("        }\n");
             }
-            rust.push_str("{\n");
-            branch
-                .tfm
-                .rust
-                .write_to_rust(ast, &mut rust, "            ");
-            _ = write!(rust, "            {val_code}\n");
-            rust.push_str("        }\n");
         }
         rust.push_str("        _ => panic!(),\n");
         rust.push_str("    }\n");
@@ -2410,20 +2411,19 @@ fn enum_to_js_helper(ast: &AST, ctx: &mut WasmCtx, enum_index: usize) -> (String
             transform_to_js(ast, ctx, &mut branch_locals, &mut tfm, &field_name, &f.ty);
             fields.push(field_name);
         }
-        let mut parts = Vec::new();
-        for (f, name) in v.fields.iter().zip(&fields).rev() {
-            let js_code = tfm.js.find(name, &f.ty, RefInline).code;
-            let mut part = String::new();
-            if f.name != js_code {
-                _ = write!(part, "{}: ", f.name);
-            }
-            part.push_str(&js_code);
-            parts.push(part);
+        let mut val_fields = vec![RustField {
+            name: "$".to_string(),
+            ty: RustType::ForeignHandle,
+        }];
+        let mut val_names = vec![Cow::Owned(format!("{:?}", v.name))];
+        val_fields.extend_from_slice(&v.fields);
+        for name in &fields {
+            val_names.push(Cow::Borrowed(name.as_str()));
         }
-        parts.push(format!("$: {:?}", v.name));
-        parts.reverse();
-        let val_code = format!("{{ {} }}", parts.join(", "));
-        if parts.len() == 1 {
+        let val_code = tfm
+            .js
+            .find_fields(&val_fields, val_names, RefInline, "{ ", " }");
+        if v.fields.is_empty() {
             // Turn enums without fields into singletons to reduce garbage generation
             let singleton_name = ctx
                 .helper_names
@@ -2508,18 +2508,19 @@ fn enum_to_js_helper(ast: &AST, ctx: &mut WasmCtx, enum_index: usize) -> (String
         let read = js_read(ctx, &buf_name, &RustType::I32);
         _ = write!(js, "    switch ({read}) {{\n",);
         for (v, branch) in e.variants.iter().zip(&mut branches) {
-            _ = write!(js, "        case {}:", v.discriminant);
             let val_code = branch
                 .tfm
                 .js
                 .find(&val_name, &RustType::Enum(enum_index), RefInline)
                 .code;
             if branch.tfm.js.is_empty() {
-                _ = write!(js, " return {val_code};\n");
+                let val_code = format!("case {}: return {val_code};", v.discriminant);
+                branch.tfm.js.line(val_code);
+                branch.tfm.js.write_to_js(ast, &mut js, "        ");
             } else {
-                js.push_both(" {\n");
+                _ = write!(js, "        case {}: {{\n", v.discriminant);
+                branch.tfm.js.line(format!("return {val_code};"));
                 branch.tfm.js.write_to_js(ast, &mut js, "            ");
-                _ = write!(js, "            return {val_code};\n");
                 js.push_both("        }\n");
             }
         }

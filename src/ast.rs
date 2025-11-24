@@ -83,6 +83,7 @@ pub struct RustTrait {
     pub fns: Vec<RustFn>,
 }
 
+#[derive(Clone)]
 pub struct RustField {
     pub name: String,
     pub ty: RustType,
