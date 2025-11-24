@@ -7,3 +7,4 @@ export function rust_mem_leaked(): number;
 export function add_void(x: number, y: number): void;
 export function add_empty_tuple(x: number, y: number): undefined;
 export function get_result(): number;
+export function wild_arg(_1: number, _2: undefined, _3: number): undefined;

@@ -18,15 +18,18 @@ impl AST {
             names.add(k.to_string());
         }
 
-        for f in &mut self.fns {
+        // Avoid the "_" symbol in Rust
+        names.add("_".to_string());
+
+        let rename_keywords_in_fn = move |f: &mut RustFn| {
             // Avoid cloning the set in the common case
             if !f
                 .args
                 .iter()
                 .chain(f.returns.iter())
-                .any(|x| keywords.contains(x.name.as_str()))
+                .any(|x| names.contains(x.name.as_str()))
             {
-                continue;
+                return;
             }
 
             // Rename all relevant local identifiers
@@ -36,6 +39,16 @@ impl AST {
             }
             if let Some(ret) = &mut f.returns {
                 ret.name = names.create(&ret.name);
+            }
+        };
+
+        for f in &mut self.fns {
+            rename_keywords_in_fn(f);
+        }
+
+        for t in &mut self.traits {
+            for f in &mut t.fns {
+                rename_keywords_in_fn(f);
             }
         }
     }

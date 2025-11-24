@@ -13,9 +13,16 @@ pub struct NameSet {
 }
 
 impl NameSet {
+    pub fn contains(&self, name: &str) -> bool {
+        self.used.contains(name)
+    }
+
     pub fn find(&self, base: &str) -> String {
         let mut name = base.to_string();
-        let mut tries = 1;
+        let mut tries = match name.as_str() {
+            "_" => 0,
+            _ => 1,
+        };
         while self.used.contains(&name) {
             tries += 1;
             name = format!("{base}{tries}");

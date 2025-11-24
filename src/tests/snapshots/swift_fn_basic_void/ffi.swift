@@ -16,3 +16,8 @@ func add_empty_tuple(_ x: Int32, _ y: Int32) -> () {
 func get_result() -> Int32 {
     return _ffi_fn_get_result()
 }
+
+func wild_arg(_ _1: Int32, _ _2: (), _ _3: Int32) -> () {
+    _ffi_fn_wild_arg(_1, _3)
+    return ()
+}

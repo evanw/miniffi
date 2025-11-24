@@ -15,4 +15,6 @@ std::tuple<> add_empty_tuple(int32_t x, int32_t y);
 
 int32_t get_result();
 
+std::tuple<> wild_arg(int32_t _1, std::tuple<> _2, int32_t _3);
+
 } // namespace rust

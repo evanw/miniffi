@@ -31,6 +31,11 @@ export function get_result() {
     return _ffi_exports._ffi_fn_get_result();
 }
 
+export function wild_arg(_1, _2, _3) {
+    _ffi_exports._ffi_fn_wild_arg(_1, _3);
+    return undefined;
+}
+
 let _ffi_exports;
 
 const _ffi_imports = {};

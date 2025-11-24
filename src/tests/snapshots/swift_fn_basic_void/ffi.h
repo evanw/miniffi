@@ -16,6 +16,8 @@ int32_t _ffi_fn_get_result();
 
 uintptr_t _ffi_fn_rust_mem_leaked();
 
+void _ffi_fn_wild_arg(int32_t _1, int32_t _3);
+
 #ifdef __cplusplus
 }
 #endif

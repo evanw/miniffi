@@ -306,7 +306,6 @@ fn to_rust_fn(
                         "only identifiers are supported",
                     ));
                 };
-                let name = name.unraw().to_string();
                 let Some(ty) = to_rust_type(ast, &arg.ty) else {
                     return Err(unsupported(
                         file,
@@ -656,11 +655,12 @@ fn type_to_single_ident_with_argument(ast: &AST, ty: &syn::Type) -> Option<(Stri
     None
 }
 
-fn pat_to_single_ident(pat: &syn::Pat) -> Option<&syn::Ident> {
-    let syn::Pat::Ident(syn::PatIdent { ident, .. }) = pat else {
-        return None;
-    };
-    Some(ident)
+fn pat_to_single_ident(pat: &syn::Pat) -> Option<String> {
+    match pat {
+        syn::Pat::Ident(syn::PatIdent { ident, .. }) => Some(ident.unraw().to_string()),
+        syn::Pat::Wild(_) => Some("_".to_string()),
+        _ => None,
+    }
 }
 
 fn unsupported(

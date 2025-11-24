@@ -17,6 +17,11 @@ fn test_case() -> TestCase {
         pub fn get_result() -> i32 {
             unsafe { RESULT }
         }
+
+        // Make sure the "_" wildcard pattern works as an argument
+        pub fn wild_arg(_: i32, _: (), _: i32) -> () {
+            unsafe { RESULT = 123; }
+        }
     "#;
 
     case.checks = vec![
@@ -29,6 +34,14 @@ fn test_case() -> TestCase {
         AssertEqual(
             Call(Export("get_result").into(), [].into()).into(),
             I32(7).into(),
+        ),
+        Call(
+            Export("wild_arg").into(),
+            [I32(-1), Tuple([].into()), I32(-2)].into(),
+        ),
+        AssertEqual(
+            Call(Export("get_result").into(), [].into()).into(),
+            I32(123).into(),
         ),
     ];
 

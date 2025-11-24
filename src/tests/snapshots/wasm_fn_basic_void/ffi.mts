@@ -31,12 +31,18 @@ export function get_result(): number {
     return _ffi_exports._ffi_fn_get_result();
 }
 
+export function wild_arg(_1: number, _2: undefined, _3: number): undefined {
+    _ffi_exports._ffi_fn_wild_arg(_1, _3);
+    return undefined;
+}
+
 let _ffi_exports: {
     memory: WebAssembly.Memory,
     _ffi_fn_add_empty_tuple: (x: number, y: number) => void,
     _ffi_fn_add_void: (x: number, y: number) => void,
     _ffi_fn_get_result: () => number,
     _ffi_fn_rust_mem_leaked: () => number,
+    _ffi_fn_wild_arg: (_1: number, _3: number) => void,
 };
 
 const _ffi_imports = {};

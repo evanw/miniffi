@@ -19,3 +19,8 @@ extern "C" fn _ffi_fn_get_result() -> i32 {
 extern "C" fn _ffi_fn_rust_mem_leaked() -> usize {
     rust_mem_leaked()
 }
+
+#[unsafe(no_mangle)]
+extern "C" fn _ffi_fn_wild_arg(_1: i32, _3: i32) {
+    _ = wild_arg(_1, (), _3);
+}

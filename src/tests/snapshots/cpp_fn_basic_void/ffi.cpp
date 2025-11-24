@@ -8,6 +8,7 @@ void _ffi_fn_add_empty_tuple(int32_t x, int32_t y);
 void _ffi_fn_add_void(int32_t x, int32_t y);
 int32_t _ffi_fn_get_result();
 uintptr_t _ffi_fn_rust_mem_leaked();
+void _ffi_fn_wild_arg(int32_t _1, int32_t _3);
 
 } // extern "C"
 
@@ -26,4 +27,10 @@ int32_t rust::get_result() {
 
 uintptr_t rust::rust_mem_leaked() {
     return _ffi_fn_rust_mem_leaked();
+}
+
+std::tuple<> rust::wild_arg(int32_t _1, std::tuple<> _2, int32_t _3) {
+    (void)_2;
+    _ffi_fn_wild_arg(_1, _3);
+    return std::tuple<>();
 }
