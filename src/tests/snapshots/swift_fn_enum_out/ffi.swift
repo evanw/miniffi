@@ -11,6 +11,14 @@ enum Big: Int32 {
     case Max = 2147483647
 }
 
+enum LongEnum {
+    case Empty
+    case ShortTuple(Int32)
+    case ShortStruct(a: Int32)
+    case LongTuple(Int32, Int32, Int32, Int32, Int32, Int32, Int32, Int32)
+    case LongStruct(a: Int32, b: Int32, c: Int32, d: Int32, e: Int32, f: Int32)
+}
+
 func rust_mem_leaked() -> UInt {
     return _ffi_fn_rust_mem_leaked()
 }
@@ -23,4 +31,31 @@ func i32_to_foo(_ foo: Int32) -> Foo {
 func i32_to_big(_ big: Int32) -> Big {
     let ret_raw = _ffi_fn_i32_to_big(big)
     return Big(rawValue: ret_raw)!
+}
+
+func long_out() -> LongEnum {
+    let multi_ret = _ffi_fn_long_out()
+    let buf_ptr = multi_ret._0
+    let buf_cap = multi_ret._1
+    var buf_end = buf_ptr!
+    let ret = _ffi_enum_LongEnum_from_rust(&buf_end)
+    _ffi_dealloc(buf_ptr, buf_cap)
+    return ret
+}
+
+private func _ffi_read<T>(_ ptr: inout UnsafeRawPointer) -> T {
+    let val = ptr.loadUnaligned(fromByteOffset: 0, as: T.self)
+    ptr = ptr.advanced(by: MemoryLayout<T>.size)
+    return val
+}
+
+private func _ffi_enum_LongEnum_from_rust(_ end: inout UnsafeRawPointer) -> LongEnum {
+    switch _ffi_read(&end) as Int32 {
+        case 0: return .Empty
+        case 1: return .ShortTuple(_ffi_read(&end) as Int32)
+        case 2: return .ShortStruct(a: _ffi_read(&end) as Int32)
+        case 3: return .LongTuple(_ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32, _ffi_read(&end) as Int32)
+        case 4: return .LongStruct(a: _ffi_read(&end) as Int32, b: _ffi_read(&end) as Int32, c: _ffi_read(&end) as Int32, d: _ffi_read(&end) as Int32, e: _ffi_read(&end) as Int32, f: _ffi_read(&end) as Int32)
+        default: fatalError()
+    }
 }

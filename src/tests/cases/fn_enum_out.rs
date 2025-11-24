@@ -29,6 +29,18 @@ fn test_case() -> TestCase {
                 _ => panic!(),
             }
         }
+
+        // Also test code generation for enums with many members
+        pub enum LongEnum {
+            Empty,
+            ShortTuple(i32),
+            ShortStruct { a: i32, },
+            LongTuple(i32, i32, i32, i32, i32, i32, i32, i32),
+            LongStruct { a: i32, b: i32, c: i32, d: i32, e: i32, f: i32 },
+        }
+        pub fn long_out() -> LongEnum {
+            LongEnum::Empty
+        }
     "#;
 
     case.checks = vec![

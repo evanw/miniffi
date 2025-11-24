@@ -14,6 +14,14 @@ export const enum Big {
     Max = 2147483647,
 }
 
+export type LongEnum =
+    | { readonly $: "Empty" }
+    | { readonly $: "ShortTuple", 0: number }
+    | { readonly $: "ShortStruct", a: number }
+    | { readonly $: "LongTuple", 0: number, 1: number, 2: number, 3: number, 4: number, 5: number, 6: number, 7: number }
+    | { readonly $: "LongStruct", a: number, b: number, c: number, d: number, e: number, f: number }
+
 export function rust_mem_leaked(): number;
 export function i32_to_foo(foo: number): Foo;
 export function i32_to_big(big: number): Big;
+export function long_out(): LongEnum;

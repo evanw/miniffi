@@ -3,6 +3,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <variant>
 
 namespace rust {
 
@@ -17,10 +18,59 @@ enum struct Foo : int32_t {
     Hundred = 100,
 };
 
+namespace detail {
+
+struct LongEnum__Empty {
+};
+
+struct LongEnum__ShortTuple {
+    int32_t _0 = 0;
+};
+
+struct LongEnum__ShortStruct {
+    int32_t a = 0;
+};
+
+struct LongEnum__LongTuple {
+    int32_t _0 = 0;
+    int32_t _1 = 0;
+    int32_t _2 = 0;
+    int32_t _3 = 0;
+    int32_t _4 = 0;
+    int32_t _5 = 0;
+    int32_t _6 = 0;
+    int32_t _7 = 0;
+};
+
+struct LongEnum__LongStruct {
+    int32_t a = 0;
+    int32_t b = 0;
+    int32_t c = 0;
+    int32_t d = 0;
+    int32_t e = 0;
+    int32_t f = 0;
+};
+
+} // namespace detail
+
+struct LongEnum : std::variant<std::monostate, detail::LongEnum__Empty, detail::LongEnum__ShortTuple, detail::LongEnum__ShortStruct, detail::LongEnum__LongTuple, detail::LongEnum__LongStruct> {
+    using Empty = detail::LongEnum__Empty;
+    using ShortTuple = detail::LongEnum__ShortTuple;
+    using ShortStruct = detail::LongEnum__ShortStruct;
+    using LongTuple = detail::LongEnum__LongTuple;
+    using LongStruct = detail::LongEnum__LongStruct;
+    using std::variant<std::monostate, Empty, ShortTuple, ShortStruct, LongTuple, LongStruct>::operator =;
+    template <typename T> bool is() const { return std::holds_alternative<T>(*this); }
+    template <typename T> const T* as() const { return std::get_if<T>(this); }
+    template <typename T> T* as() { return std::get_if<T>(this); }
+};
+
 uintptr_t rust_mem_leaked();
 
 int32_t foo_to_i32(Foo foo);
 
 int32_t big_to_i32(Big big);
+
+void long_in(LongEnum _1);
 
 } // namespace rust

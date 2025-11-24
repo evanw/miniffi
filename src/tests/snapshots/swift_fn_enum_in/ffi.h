@@ -8,9 +8,13 @@
 extern "C" {
 #endif
 
+void* _ffi_alloc(intptr_t len);
+
 int32_t _ffi_fn_big_to_i32(int32_t big_raw);
 
 int32_t _ffi_fn_foo_to_i32(int32_t foo_raw);
+
+void _ffi_fn_long_in(const void* buf_ptr);
 
 uintptr_t _ffi_fn_rust_mem_leaked();
 

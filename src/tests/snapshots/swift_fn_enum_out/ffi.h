@@ -8,9 +8,18 @@
 extern "C" {
 #endif
 
+void _ffi_dealloc(const void* ptr, uintptr_t capacity);
+
 int32_t _ffi_fn_i32_to_big(int32_t big);
 
 int32_t _ffi_fn_i32_to_foo(int32_t foo);
+
+typedef struct {
+    const void* _0;
+    uintptr_t _1;
+} _ffi_ret_ptr_usize;
+
+_ffi_ret_ptr_usize _ffi_fn_long_out();
 
 uintptr_t _ffi_fn_rust_mem_leaked();
 

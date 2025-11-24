@@ -25,6 +25,13 @@ export const enum Big {
     Max = 2147483647,
 }
 
+export type LongEnum =
+    | { readonly $: "Empty" }
+    | { readonly $: "ShortTuple", 0: number }
+    | { readonly $: "ShortStruct", a: number }
+    | { readonly $: "LongTuple", 0: number, 1: number, 2: number, 3: number, 4: number, 5: number, 6: number, 7: number }
+    | { readonly $: "LongStruct", a: number, b: number, c: number, d: number, e: number, f: number }
+
 export function rust_mem_leaked(): number {
     return _ffi_exports._ffi_fn_rust_mem_leaked();
 }
@@ -37,11 +44,95 @@ export function big_to_i32(big: Big): number {
     return _ffi_exports._ffi_fn_big_to_i32(big);
 }
 
+export function long_in(_1: LongEnum): void {
+    let buf = _ffi_new_WriteBuf();
+    _ffi_enum_LongEnum_to_rust(_1, buf);
+    _ffi_exports._ffi_fn_long_in(_ffi_buf_to_rust(buf));
+}
+
+let _ffi_new_WriteBuf = (): _ffi_WriteBuf => ({ u8: new Uint8Array(16), dv: null, off: 0 });
+let _ffi_u8: Uint8Array;
+
+interface _ffi_WriteBuf {
+    u8: Uint8Array,
+    dv: DataView | null,
+    off: number,
+}
+
+function _ffi_update_u8(): Uint8Array {
+    let buffer = _ffi_exports.memory.buffer;
+    if (!_ffi_u8 || _ffi_u8.buffer !== buffer) _ffi_u8 = new Uint8Array(buffer);
+    return _ffi_u8;
+}
+
+function _ffi_buf_to_rust({ u8, off }: _ffi_WriteBuf): number {
+    let ptr = _ffi_exports._ffi_alloc(off);
+    _ffi_update_u8().set(u8.length > off ? u8.subarray(0, off) : u8, ptr);
+    return ptr;
+}
+
+function _ffi_enum_LongEnum_to_rust(val: LongEnum, buf: _ffi_WriteBuf): void {
+    switch (val.$) {
+        case "Empty":
+            _ffi_write_i32(buf, 0);
+            break;
+        case "ShortTuple":
+            _ffi_write_i32(buf, 1);
+            _ffi_write_i32(buf, val[0]);
+            break;
+        case "ShortStruct":
+            _ffi_write_i32(buf, 2);
+            _ffi_write_i32(buf, val.a);
+            break;
+        case "LongTuple":
+            _ffi_write_i32(buf, 3);
+            _ffi_write_i32(buf, val[0]);
+            _ffi_write_i32(buf, val[1]);
+            _ffi_write_i32(buf, val[2]);
+            _ffi_write_i32(buf, val[3]);
+            _ffi_write_i32(buf, val[4]);
+            _ffi_write_i32(buf, val[5]);
+            _ffi_write_i32(buf, val[6]);
+            _ffi_write_i32(buf, val[7]);
+            break;
+        case "LongStruct":
+            _ffi_write_i32(buf, 4);
+            _ffi_write_i32(buf, val.a);
+            _ffi_write_i32(buf, val.b);
+            _ffi_write_i32(buf, val.c);
+            _ffi_write_i32(buf, val.d);
+            _ffi_write_i32(buf, val.e);
+            _ffi_write_i32(buf, val.f);
+            break;
+        default:
+            throw TypeError("Invalid value for enum \"LongEnum\"");
+    }
+}
+
+function _ffi_grow(buf: _ffi_WriteBuf, n: number): number {
+    let off = buf.off;
+    let u8 = buf.u8;
+    if (off + n > u8.length) {
+        (buf.u8 = new Uint8Array((off + n) << 1)).set(u8);
+        buf.dv = null;
+    }
+    buf.off += n;
+    if (!buf.dv) buf.dv = new DataView(buf.u8.buffer);
+    return off;
+}
+
+function _ffi_write_i32(buf: _ffi_WriteBuf, val: number): void {
+    let ptr = _ffi_grow(buf, 4);
+    buf.dv!.setInt32(ptr, val, true);
+}
+
 let _ffi_exports: {
     memory: WebAssembly.Memory,
     _ffi_fn_big_to_i32: (big_raw: number) => number,
     _ffi_fn_foo_to_i32: (foo_raw: number) => number,
+    _ffi_fn_long_in: (buf_ptr: number) => void,
     _ffi_fn_rust_mem_leaked: () => number,
+    _ffi_alloc: (len: number) => number,
 };
 
 const _ffi_imports = {};

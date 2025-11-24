@@ -37,6 +37,43 @@ export function i32_to_big(big) {
     return _ffi_exports._ffi_fn_i32_to_big(big);
 }
 
+export function long_out() {
+    let multi_ret = _ffi_exports._ffi_fn_long_out();
+    let buf_ptr = _ffi_update_dv().getInt32(multi_ret, true);
+    let buf_cap = _ffi_dv.getUint32(multi_ret + 4, true);
+    let buf = _ffi_new_ReadBuf(buf_ptr);
+    let ret = _ffi_enum_LongEnum_from_rust(buf);
+    _ffi_exports._ffi_dealloc(buf_ptr, buf_cap);
+    return ret;
+}
+
+let _ffi_dv;
+let _ffi_new_ReadBuf = (off) => ({ dv: _ffi_update_dv(), off });
+let _ffi_enum_LongEnum__Empty = { $: "Empty" };
+
+function _ffi_update_dv() {
+    let buffer = _ffi_exports.memory.buffer;
+    if (!_ffi_dv || _ffi_dv.buffer !== buffer) _ffi_dv = new DataView(buffer);
+    return _ffi_dv;
+}
+
+function _ffi_enum_LongEnum_from_rust(buf) {
+    switch (_ffi_read_i32(buf)) {
+        case 0: return _ffi_enum_LongEnum__Empty;
+        case 1: return { $: "ShortTuple", 0: _ffi_read_i32(buf) };
+        case 2: return { $: "ShortStruct", a: _ffi_read_i32(buf) };
+        case 3: return { $: "LongTuple", 0: _ffi_read_i32(buf), 1: _ffi_read_i32(buf), 2: _ffi_read_i32(buf), 3: _ffi_read_i32(buf), 4: _ffi_read_i32(buf), 5: _ffi_read_i32(buf), 6: _ffi_read_i32(buf), 7: _ffi_read_i32(buf) };
+        case 4: return { $: "LongStruct", a: _ffi_read_i32(buf), b: _ffi_read_i32(buf), c: _ffi_read_i32(buf), d: _ffi_read_i32(buf), e: _ffi_read_i32(buf), f: _ffi_read_i32(buf) };
+        default: throw Error();
+    }
+}
+
+function _ffi_read_i32(buf) {
+    let val = buf.dv.getInt32(buf.off, true);
+    buf.off += 4;
+    return val;
+}
+
 let _ffi_exports;
 
 const _ffi_imports = {};
