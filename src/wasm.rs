@@ -131,6 +131,7 @@ use std::rc::Rc;
 /// which allocate temporary buffers for this instead since they need to work in
 /// a multi-threaded environment.
 pub struct WasmTarget {
+    common_options: CommonOptions,
     js_path: Option<PathBuf>,
     ts_path: Option<PathBuf>,
     d_ts_path: Option<PathBuf>,
@@ -140,6 +141,7 @@ pub struct WasmTarget {
 impl WasmTarget {
     pub fn new() -> WasmTarget {
         WasmTarget {
+            common_options: CommonOptions::default(),
             js_path: None,
             ts_path: None,
             d_ts_path: None,
@@ -257,6 +259,10 @@ enum JsGroup {
 }
 
 impl Compile for WasmTarget {
+    fn common_options(&mut self) -> &mut CommonOptions {
+        &mut self.common_options
+    }
+
     fn compile(&self, mut ast: AST, rust_path: PathBuf) -> Vec<FileData> {
         let mut js_helpers = HelperSet::<JsGroup, JsString>::default();
         let mut rust_helpers = HelperSet::<(), String>::default();

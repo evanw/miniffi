@@ -170,6 +170,7 @@ use std::rc::Rc;
 /// c++ -std=c++17 main.cpp miniffi.cpp ./target/debug/libexample.a
 /// ```
 pub struct CppTarget {
+    common_options: CommonOptions,
     namespace: String,
     source_path: PathBuf,
     header_path: PathBuf,
@@ -178,6 +179,7 @@ pub struct CppTarget {
 impl CppTarget {
     pub fn new() -> CppTarget {
         CppTarget {
+            common_options: CommonOptions::default(),
             namespace: "rust".to_string(),
             source_path: "miniffi.cpp".into(),
             header_path: "miniffi.h".into(),
@@ -315,6 +317,10 @@ enum SourceGroup {
 }
 
 impl Compile for CppTarget {
+    fn common_options(&mut self) -> &mut CommonOptions {
+        &mut self.common_options
+    }
+
     fn compile(&self, mut ast: AST, rust_path: PathBuf) -> Vec<FileData> {
         let mut rust_helpers = HelperSet::<(), String>::default();
         let mut source_helpers = HelperSet::<SourceGroup, String>::default();

@@ -194,6 +194,10 @@ pub trait Target {
     /// writing a cargo build script, you likely want to call
     /// [`build`](Target::build) instead.
     fn build_custom(&self, input_file: FileData, output_path: PathBuf) -> BuildResult;
+
+    /// Set the edition for the generated Rust code. This can be necessary
+    /// because different editions of Rust use different syntax.
+    fn rust_edition(self, year: usize) -> Self;
 }
 
 /// Holds the result of calling [`build`](Target::build) or
@@ -376,11 +380,27 @@ pub struct FileData {
     pub contents: String,
 }
 
+struct CommonOptions {
+    edition: usize,
+}
+
+impl Default for CommonOptions {
+    fn default() -> CommonOptions {
+        CommonOptions { edition: 2024 }
+    }
+}
+
 trait Compile {
+    fn common_options(&mut self) -> &mut CommonOptions;
     fn compile(&self, ast: AST, rust_path: PathBuf) -> Vec<FileData>;
 }
 
 impl<T: Compile> Target for T {
+    fn rust_edition(mut self, year: usize) -> Self {
+        self.common_options().edition = year;
+        self
+    }
+
     fn build_custom(&self, input_file: FileData, output_path: PathBuf) -> BuildResult {
         let mut output_files = Vec::new();
         let mut errors = Vec::new();
@@ -438,16 +458,22 @@ impl<T: Compile> Target for T {
 /// }
 /// ```
 pub struct NullTarget {
-    _force_new: (),
+    common_options: CommonOptions,
 }
 
 impl NullTarget {
     pub fn new() -> NullTarget {
-        NullTarget { _force_new: () }
+        NullTarget {
+            common_options: CommonOptions::default(),
+        }
     }
 }
 
 impl Compile for NullTarget {
+    fn common_options(&mut self) -> &mut CommonOptions {
+        &mut self.common_options
+    }
+
     fn compile(&self, _ast: AST, rust_path: PathBuf) -> Vec<FileData> {
         vec![FileData {
             path: rust_path,

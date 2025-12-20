@@ -136,6 +136,7 @@ use std::rc::Rc;
 ///     doesn't use your `$PATH` and won't be able to find the `cargo` binary
 ///     otherwise.
 pub struct SwiftTarget {
+    common_options: CommonOptions,
     swift_path: PathBuf,
     header_path: PathBuf,
 }
@@ -143,6 +144,7 @@ pub struct SwiftTarget {
 impl SwiftTarget {
     pub fn new() -> SwiftTarget {
         SwiftTarget {
+            common_options: CommonOptions::default(),
             swift_path: "miniffi.swift".into(),
             header_path: "miniffi.h".into(),
         }
@@ -259,6 +261,10 @@ enum HeaderGroup {
 }
 
 impl Compile for SwiftTarget {
+    fn common_options(&mut self) -> &mut CommonOptions {
+        &mut self.common_options
+    }
+
     fn compile(&self, mut ast: AST, rust_path: PathBuf) -> Vec<FileData> {
         let mut rust_helpers = HelperSet::<(), String>::default();
         let mut swift_helpers = HelperSet::<(), String>::default();
