@@ -322,11 +322,12 @@ impl Compile for CppTarget {
     }
 
     fn compile(&self, mut ast: AST, rust_path: PathBuf) -> Vec<FileData> {
+        let syntax = RustSyntax::with_edition(self.common_options.edition);
         let mut rust_helpers = HelperSet::<(), String>::default();
         let mut source_helpers = HelperSet::<SourceGroup, String>::default();
         let mut header_helpers = HelperSet::<HeaderGroup, String>::default();
 
-        add_common_rust_helpers(&mut rust_helpers);
+        add_common_rust_helpers(&syntax, &mut rust_helpers);
         ast.rename_keywords(CPP_KEYWORDS);
 
         for (name, code) in [
@@ -673,6 +674,7 @@ std::string _ffi_string_from_rust(const char* ptr, uintptr_t len, uintptr_t cap)
         }
 
         let mut ctx = CppCtx {
+            syntax,
             namespace: self.namespace.clone(),
             rust_helpers,
             source_helpers,
@@ -810,6 +812,7 @@ fn cpp_struct_field_init(ast: &AST, ty: &RustType) -> &'static str {
 
 #[derive(Default)]
 struct CppCtx {
+    syntax: RustSyntax,
     namespace: String,
     helper_names: NameSet,
     rust_helpers: HelperSet<(), String>,
@@ -1071,7 +1074,7 @@ fn generate_cpp_to_rust_fn(
 
         // Write out the final function
         let mut rust = String::new();
-        rust.push_str("\n#[unsafe(no_mangle)]\n");
+        _ = write!(rust, "\n{}\n", ctx.syntax.unsafe_no_mangle());
         _ = write!(rust, "extern \"C\" fn {ffi_name}(");
         if trait_info.is_some() {
             rust.push_str("_self: *const u8");
@@ -1213,7 +1216,8 @@ fn generate_rust_to_cpp_fn(
         rust.push_str(" {\n");
         _ = write!(
             rust,
-            "        unsafe extern \"C\" {{ fn {ffi_name}(_: *const u8"
+            "        {} \"C\" {{ fn {ffi_name}(_: *const u8",
+            ctx.syntax.unsafe_extern()
         );
         for arg in &arg_tfm.ffi_args {
             _ = write!(rust, ", {}: ", arg.name);
@@ -2332,7 +2336,8 @@ fn trait_to_rust_helper(ast: &AST, ctx: &mut CppCtx, trait_index: usize, kind: R
         rust.push_str("    fn drop(&mut self) {\n");
         _ = write!(
             rust,
-            "        unsafe extern \"C\" {{ fn {drop_name}(_: *const u8); }}\n"
+            "        {} \"C\" {{ fn {drop_name}(_: *const u8); }}\n",
+            ctx.syntax.unsafe_extern()
         );
         _ = write!(rust, "        unsafe {{ {drop_name}(self.0) }};\n");
         rust.push_str("    }\n");
@@ -2421,7 +2426,7 @@ fn trait_to_cpp_helper(ast: &AST, ctx: &mut CppCtx, trait_index: usize, kind: Ru
     // Rust
     {
         let mut rust = String::new();
-        rust.push_str("\n#[unsafe(no_mangle)]\n");
+        _ = write!(rust, "\n{}\n", ctx.syntax.unsafe_no_mangle());
         _ = write!(rust, "extern \"C\" fn {drop_name}(ptr: *const u8) {{\n");
         _ = write!(
             rust,

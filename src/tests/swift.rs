@@ -33,22 +33,25 @@ pub fn run_test(name: &str, case: &TestCase, edition: usize) {
 
     std::fs::write(
         test_dir.join("build.rs"),
-        r#"
-        fn main() {
-            use miniffi::*;
-            let mut result = SwiftTarget::new()
-                .write_swift_to("ffi.swift")
-                .write_header_to("ffi.h")
-                .build()
-                .convert_warnings_to_errors();
-            result.finish();
-            for output in &result.output_files {
-                if output.path.extension().unwrap() == "rs" {
-                    std::fs::copy(&output.path, "miniffi.rs").unwrap();
-                }
-            }
-        }
-        "#,
+        format!(
+            r#"
+            fn main() {{
+                use miniffi::*;
+                let mut result = SwiftTarget::new()
+                    .rust_edition({edition})
+                    .write_swift_to("ffi.swift")
+                    .write_header_to("ffi.h")
+                    .build()
+                    .convert_warnings_to_errors();
+                result.finish();
+                for output in &result.output_files {{
+                    if output.path.extension().unwrap() == "rs" {{
+                        std::fs::copy(&output.path, "miniffi.rs").unwrap();
+                    }}
+                }}
+            }}
+            "#
+        ),
     )
     .expect("failed to write file `build.rs`");
 

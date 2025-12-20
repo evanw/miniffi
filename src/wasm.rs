@@ -264,10 +264,11 @@ impl Compile for WasmTarget {
     }
 
     fn compile(&self, mut ast: AST, rust_path: PathBuf) -> Vec<FileData> {
+        let syntax = RustSyntax::with_edition(self.common_options.edition);
         let mut js_helpers = HelperSet::<JsGroup, JsString>::default();
         let mut rust_helpers = HelperSet::<(), String>::default();
 
-        add_common_rust_helpers(&mut rust_helpers);
+        add_common_rust_helpers(&syntax, &mut rust_helpers);
         ast.rename_keywords(JS_KEYWORDS);
 
         js_helpers.add_group(
@@ -539,30 +540,33 @@ function _ffi_update_dv()«: DataView» {
 
         rust_helpers.add(
             "_ffi_set_panic_hook",
-            r#"
-#[unsafe(no_mangle)]
-extern "C" fn _ffi_set_panic_hook() {
+            format!(
+                r#"
+{}
+extern "C" fn _ffi_set_panic_hook() {{
     #[cfg(target_arch = "wasm32")]
-    std::panic::set_hook(Box::new(|info| {
+    std::panic::set_hook(Box::new(|info| {{
         let location = info.location().unwrap();
         let thread = std::thread::current();
         let name = thread.name().unwrap_or("<unnamed>");
         let payload = info.payload();
-        let payload = if let Some(&s) = payload.downcast_ref::<&'static str>() {
+        let payload = if let Some(&s) = payload.downcast_ref::<&'static str>() {{
             s
-        } else if let Some(s) = payload.downcast_ref::<String>() {
+        }} else if let Some(s) = payload.downcast_ref::<String>() {{
             s.as_str()
-        } else {
+        }} else {{
             "Box<dyn Any>"
-        };
-        let text = format!("thread '{name}' panicked at {location}:\n{payload}");
-        unsafe extern "C" {
+        }};
+        let text = format!("thread '{{name}}' panicked at {{location}}:\n{{payload}}");
+        unsafe extern "C" {{
             fn _ffi_throw_panic(ptr: *const u8, len: usize);
-        }
-        unsafe { _ffi_throw_panic(text.as_ptr(), text.len()) }
-    }));
-}
+        }}
+        unsafe {{ _ffi_throw_panic(text.as_ptr(), text.len()) }}
+    }}));
+}}
 "#,
+                syntax.unsafe_no_mangle()
+            ),
         );
 
         let js_path =
@@ -729,6 +733,7 @@ export async function instantiateStreaming(\
         }
 
         let mut ctx = WasmCtx {
+            syntax,
             js_helpers,
             rust_helpers,
             ..WasmCtx::default()
@@ -829,6 +834,7 @@ export async function instantiateStreaming(\
 
 #[derive(Default)]
 struct WasmCtx {
+    syntax: RustSyntax,
     helper_names: NameSet,
     js_helpers: HelperSet<JsGroup, JsString>,
     rust_helpers: HelperSet<(), String>,
@@ -1082,14 +1088,22 @@ fn generate_js_to_rust_fn(
             _ => {
                 let (ty_name, static_name) = multi_ret_helper(ast, ctx, &ret_tfm.ffi_args);
                 let args = fb.find_args(&ret_tfm.ffi_args, RefInline);
-                fb.line(format!("unsafe {{ {static_name} = {ty_name}({args}) }};"));
+
+                // Note: This must be formatted this way (both lines in one
+                // unsafe block) to work correctly across different versions
+                // of Rust. Older versions of Rust give an error if "unsafe"
+                // is missing and newer versions of Rust give an error if
+                // "unsafe" is present.
+                fb.line("unsafe {".into());
+                fb.line(format!("{static_name} = {ty_name}({args});"));
                 fb.line(format!("std::ptr::addr_of!({static_name})"));
+                fb.line("}".into());
             }
         }
 
         // Write out the final function
         let mut rust = String::new();
-        rust.push_str("\n#[unsafe(no_mangle)]\n");
+        _ = write!(rust, "\n{}\n", ctx.syntax.unsafe_no_mangle());
         _ = write!(rust, "extern \"C\" fn {ffi_name}(");
         if trait_info.is_some() {
             rust.push_str("_self: *const u8");
@@ -1214,7 +1228,8 @@ fn generate_rust_to_js_fn(
         rust.push_str(" {\n");
         _ = write!(
             rust,
-            "        unsafe extern \"C\" {{ fn {ffi_name}(_: *const u8"
+            "        {} \"C\" {{ fn {ffi_name}(_: *const u8",
+            ctx.syntax.unsafe_extern()
         );
         for arg in &arg_tfm.ffi_args {
             _ = write!(rust, ", {}: ", arg.name);
@@ -2016,7 +2031,8 @@ fn trait_to_rust_helper(ast: &AST, ctx: &mut WasmCtx, trait_index: usize) -> Str
         rust.push_str("    fn drop(&mut self) {\n");
         _ = write!(
             rust,
-            "        unsafe extern \"C\" {{ fn _ffi_js_drop(_: *const u8); }}\n"
+            "        {} \"C\" {{ fn _ffi_js_drop(_: *const u8); }}\n",
+            ctx.syntax.unsafe_extern()
         );
         _ = write!(rust, "        unsafe {{ _ffi_js_drop(self.0) }};\n");
         rust.push_str("    }\n");
@@ -2091,7 +2107,7 @@ const {js_name} = class {}« implements {}» {{
     // Rust
     {
         let mut rust = String::new();
-        rust.push_str("\n#[unsafe(no_mangle)]\n");
+        _ = write!(rust, "\n{}\n", ctx.syntax.unsafe_no_mangle());
         _ = write!(rust, "extern \"C\" fn {drop_name}(ptr: *const u8) {{\n");
         _ = write!(
             rust,

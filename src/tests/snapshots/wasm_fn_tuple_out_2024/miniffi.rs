@@ -3,8 +3,10 @@
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_fn_return_pair(x: f32, y: bool) -> *const _ffi_ret_f32_bool {
     let ret = return_pair(x, y);
-    unsafe { _FFI_RET_F32_BOOL = _ffi_ret_f32_bool(ret.0, ret.1) };
-    std::ptr::addr_of!(_FFI_RET_F32_BOOL)
+    unsafe {
+        _FFI_RET_F32_BOOL = _ffi_ret_f32_bool(ret.0, ret.1);
+        std::ptr::addr_of!(_FFI_RET_F32_BOOL)
+    }
 }
 
 #[unsafe(no_mangle)]

@@ -19,8 +19,10 @@ extern "C" fn _ffi_fn_opt_int(x: bool, y: i32) -> *const _ffi_ret_ptr_usize_bool
         _ffi_write(ret_val, &mut buf);
     }
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret) };
-    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
+    unsafe {
+        _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret);
+        std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -35,8 +37,10 @@ extern "C" fn _ffi_fn_opt_opt_int(x: bool, y: bool, z: i32) -> *const _ffi_ret_p
         }
     }
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret) };
-    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
+    unsafe {
+        _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret);
+        std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -49,8 +53,10 @@ extern "C" fn _ffi_fn_opt_vec_opt_string(n: i32) -> *const _ffi_ret_ptr_usize_bo
         _ffi_vec_option_string_to_js(ret_val, &mut buf);
     }
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret) };
-    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
+    unsafe {
+        _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret);
+        std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -65,8 +71,10 @@ extern "C" fn _ffi_fn_vec_opt_int(n: i32) -> *const _ffi_ret_ptr_2_usize {
     let ret_len = ret.len();
     _ffi_vec_option_i32_to_js(ret, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr, buf_cap, ret_len) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr, buf_cap, ret_len);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 #[repr(C)]

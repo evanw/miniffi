@@ -52,23 +52,26 @@ pub fn run_test(name: &str, case: &TestCase, edition: usize) {
 
     std::fs::write(
         test_dir.join("build.rs"),
-        r#"
-        fn main() {
-            use miniffi::*;
-            let mut result = WasmTarget::new()
-                .write_js_to("ffi.mjs")
-                .write_ts_to("ffi.mts")
-                .write_d_ts_to("ffi.d.mts")
-                .build()
-                .convert_warnings_to_errors();
-            result.finish();
-            for output in &result.output_files {
-                if output.path.extension().unwrap() == "rs" {
-                    std::fs::copy(&output.path, "miniffi.rs").unwrap();
-                }
-            }
-        }
-        "#,
+        format!(
+            r#"
+            fn main() {{
+                use miniffi::*;
+                let mut result = WasmTarget::new()
+                    .rust_edition({edition})
+                    .write_js_to("ffi.mjs")
+                    .write_ts_to("ffi.mts")
+                    .write_d_ts_to("ffi.d.mts")
+                    .build()
+                    .convert_warnings_to_errors();
+                result.finish();
+                for output in &result.output_files {{
+                    if output.path.extension().unwrap() == "rs" {{
+                        std::fs::copy(&output.path, "miniffi.rs").unwrap();
+                    }}
+                }}
+            }}
+            "#
+        ),
     )
     .expect("failed to create file `build.rs`");
 

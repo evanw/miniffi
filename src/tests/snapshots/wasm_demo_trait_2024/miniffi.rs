@@ -46,8 +46,10 @@ extern "C" fn _ffi_fn_test(buf_ptr: *const u8, vec_len: usize) -> *const _ffi_re
     _ffi_vec_Example_to_js(ret, &mut buf2);
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr2, buf_cap, ret_len) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr2, buf_cap, ret_len);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {

@@ -48,8 +48,10 @@ extern "C" fn _ffi_fn_get_tests() -> *const _ffi_ret_ptr_2_usize {
     let ret_len = ret.len();
     _ffi_vec_Foo_to_js(ret, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr, buf_cap, ret_len) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr, buf_cap, ret_len);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]

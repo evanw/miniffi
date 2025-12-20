@@ -1,6 +1,33 @@
 use super::*;
 use std::borrow::Cow;
 
+#[derive(Default)]
+pub struct RustSyntax {
+    edition: usize,
+}
+
+impl RustSyntax {
+    pub fn with_edition(edition: usize) -> RustSyntax {
+        RustSyntax { edition }
+    }
+
+    pub fn unsafe_no_mangle(&self) -> &'static str {
+        if self.edition >= 2024 {
+            "#[unsafe(no_mangle)]"
+        } else {
+            "#[no_mangle]"
+        }
+    }
+
+    pub fn unsafe_extern(&self) -> &'static str {
+        if self.edition >= 2024 {
+            "unsafe extern"
+        } else {
+            "extern"
+        }
+    }
+}
+
 pub fn append_rust_type(rust: &mut String, ast: &AST, ty: &RustType) {
     use RustType::*;
     match ty {
@@ -218,7 +245,7 @@ pub fn rust_decl_ctor(
     }
 }
 
-pub fn add_common_rust_helpers(helpers: &mut HelperSet<(), String>) {
+pub fn add_common_rust_helpers(syntax: &RustSyntax, helpers: &mut HelperSet<(), String>) {
     helpers.add(
         "_ffi_read",
         r"
@@ -243,22 +270,28 @@ fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
 
     helpers.add(
         "_ffi_alloc",
-        r#"
-#[unsafe(no_mangle)]
-extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
+        format!(
+            r#"
+{}
+extern "C" fn _ffi_alloc(len: usize) -> *const u8 {{
     Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
-}
+}}
 "#,
+            syntax.unsafe_no_mangle()
+        ),
     );
 
     helpers.add(
         "_ffi_dealloc",
-        r#"
-#[unsafe(no_mangle)]
-extern "C" fn _ffi_dealloc(ptr: *mut u8, capacity: usize) {
-    drop(unsafe { Vec::from_raw_parts(ptr, 0, capacity) });
-}
+        format!(
+            r#"
+{}
+extern "C" fn _ffi_dealloc(ptr: *mut u8, capacity: usize) {{
+    drop(unsafe {{ Vec::from_raw_parts(ptr, 0, capacity) }});
+}}
 "#,
+            syntax.unsafe_no_mangle()
+        ),
     );
 
     helpers

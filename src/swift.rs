@@ -266,6 +266,7 @@ impl Compile for SwiftTarget {
     }
 
     fn compile(&self, mut ast: AST, rust_path: PathBuf) -> Vec<FileData> {
+        let syntax = RustSyntax::with_edition(self.common_options.edition);
         let mut rust_helpers = HelperSet::<(), String>::default();
         let mut swift_helpers = HelperSet::<(), String>::default();
         let mut header_helpers = HelperSet::<HeaderGroup, String>::default();
@@ -277,7 +278,7 @@ impl Compile for SwiftTarget {
             .map(|x| *x)
             .collect();
 
-        add_common_rust_helpers(&mut rust_helpers);
+        add_common_rust_helpers(&syntax, &mut rust_helpers);
         ast.rename_keywords(&all_keywords);
 
         header_helpers.add_group(
@@ -486,6 +487,7 @@ private func _ffi_string_from_rust(_ ptr: UnsafeRawPointer?, _ len: Int, _ cap: 
         }
 
         let mut ctx = SwiftCtx {
+            syntax,
             rust_helpers,
             swift_helpers,
             header_helpers,
@@ -742,6 +744,7 @@ fn generate_operator_eq_enum(e: &RustEnum) -> String {
 
 #[derive(Default)]
 struct SwiftCtx {
+    syntax: RustSyntax,
     helper_names: NameSet,
     rust_helpers: HelperSet<(), String>,
     swift_helpers: HelperSet<(), String>,
@@ -933,7 +936,7 @@ fn generate_swift_to_rust_fn(
 
         // Write out the final function
         let mut rust = String::new();
-        rust.push_str("\n#[unsafe(no_mangle)]\n");
+        _ = write!(rust, "\n{}\n", ctx.syntax.unsafe_no_mangle());
         _ = write!(rust, "extern \"C\" fn {ffi_name}(");
         if trait_info.is_some() {
             rust.push_str("_self: *const u8");
@@ -1058,7 +1061,8 @@ fn generate_rust_to_swift_fn(
         rust.push_str(" {\n");
         _ = write!(
             rust,
-            "        unsafe extern \"C\" {{ fn {ffi_name}(_: *const u8"
+            "        {} \"C\" {{ fn {ffi_name}(_: *const u8",
+            ctx.syntax.unsafe_extern()
         );
         for arg in &arg_tfm.ffi_args {
             _ = write!(rust, ", {}: ", arg.name);
@@ -1878,7 +1882,8 @@ fn trait_to_rust_helper(ast: &AST, ctx: &mut SwiftCtx, trait_index: usize) -> St
         rust.push_str("    fn drop(&mut self) {\n");
         _ = write!(
             rust,
-            "        unsafe extern \"C\" {{ fn _ffi_swift_drop(_: *const u8); }}\n"
+            "        {} \"C\" {{ fn _ffi_swift_drop(_: *const u8); }}\n",
+            ctx.syntax.unsafe_extern()
         );
         _ = write!(rust, "        unsafe {{ _ffi_swift_drop(self.0) }};\n");
         rust.push_str("    }\n");
@@ -1958,7 +1963,7 @@ fn trait_to_swift_helper(
     // Rust
     {
         let mut rust = String::new();
-        rust.push_str("\n#[unsafe(no_mangle)]\n");
+        _ = write!(rust, "\n{}\n", ctx.syntax.unsafe_no_mangle());
         _ = write!(rust, "extern \"C\" fn {drop_name}(ptr: *const u8) {{\n");
         _ = write!(
             rust,

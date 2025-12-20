@@ -41,8 +41,10 @@ extern "C" fn _ffi_fn_check_nested(x: i32) -> *const _ffi_ret_ptr_usize {
     let mut buf = Vec::<u8>::new();
     _ffi_box_box_box_i32_to_js(*ret.0, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr, buf_cap) };
-    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
+    unsafe {
+        _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr, buf_cap);
+        std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -61,8 +63,10 @@ extern "C" fn _ffi_fn_get_tree() -> *const _ffi_ret_i32_ptr_usize_2_bool {
         _ffi_box_Tree_to_js(*ret_right_val, &mut buf);
     }
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_I32_PTR_USIZE_2_BOOL = _ffi_ret_i32_ptr_usize_2_bool(ret_value, buf_ptr, buf_cap, has_ret_left, has_ret_right) };
-    std::ptr::addr_of!(_FFI_RET_I32_PTR_USIZE_2_BOOL)
+    unsafe {
+        _FFI_RET_I32_PTR_USIZE_2_BOOL = _ffi_ret_i32_ptr_usize_2_bool(ret_value, buf_ptr, buf_cap, has_ret_left, has_ret_right);
+        std::ptr::addr_of!(_FFI_RET_I32_PTR_USIZE_2_BOOL)
+    }
 }
 
 #[unsafe(no_mangle)]

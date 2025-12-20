@@ -15,8 +15,10 @@ extern "C" fn _ffi_fn_check_nested(buf_ptr: *const u8, values_len: usize) -> *co
     let mut buf_end = buf_ptr;
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(check_nested(_ffi_vec_vec_i32_from_js(values_len, &mut buf_end)));
     _ffi_buf_from_host(buf_ptr, buf_end);
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]

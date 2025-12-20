@@ -4,8 +4,10 @@
 extern "C" fn _ffi_Rc_Test__get_string(_self: *const u8) -> *const _ffi_ret_ptr_2_usize {
     let _self = unsafe { &*(_self as *const std::rc::Rc<dyn Test>) };
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(_self.get_string());
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -33,8 +35,10 @@ extern "C" fn _ffi_fn_rust_mem_leaked() -> usize {
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_fn_set_test(test_ptr: *const u8) -> *const _ffi_ret_ptr_2_usize {
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(set_test(std::rc::Rc::new(_ffi_rs_Test(test_ptr))));
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 #[repr(C)]

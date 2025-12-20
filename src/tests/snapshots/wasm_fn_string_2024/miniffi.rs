@@ -3,8 +3,10 @@
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_fn_get_string() -> *const _ffi_ret_ptr_2_usize {
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(get_string());
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]

@@ -66,8 +66,10 @@ extern "C" fn _ffi_fn_long_out() -> *const _ffi_ret_ptr_usize {
     let mut buf = Vec::<u8>::new();
     _ffi_enum_LongEnum_to_js(long_out(), &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr, buf_cap) };
-    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
+    unsafe {
+        _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr, buf_cap);
+        std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]

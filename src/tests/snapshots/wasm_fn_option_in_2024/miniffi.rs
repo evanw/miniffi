@@ -42,8 +42,10 @@ extern "C" fn _ffi_fn_join_all(buf_ptr: *const u8, x_len: usize) -> *const _ffi_
     let mut buf_end = buf_ptr;
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(join_all(_ffi_vec_option_string_from_js(x_len, &mut buf_end)));
     _ffi_buf_from_host(buf_ptr, buf_end);
-    unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    unsafe {
+        _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap);
+        std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]

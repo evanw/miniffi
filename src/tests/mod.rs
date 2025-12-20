@@ -11,6 +11,12 @@ mod wasm;
 macro_rules! test_all {
     () => {
         #[test]
+        fn wasm_2021() {
+            begin_test();
+            wasm::run_test(file!(), &test_case(), 2021);
+            end_test();
+        }
+        #[test]
         fn wasm_2024() {
             begin_test();
             wasm::run_test(file!(), &test_case(), 2024);
@@ -18,12 +24,24 @@ macro_rules! test_all {
         }
 
         #[test]
+        fn swift_2021() {
+            begin_test();
+            swift::run_test(file!(), &test_case(), 2021);
+            end_test();
+        }
+        #[test]
         fn swift_2024() {
             begin_test();
             swift::run_test(file!(), &test_case(), 2024);
             end_test();
         }
 
+        #[test]
+        fn cpp_2021() {
+            begin_test();
+            cpp::run_test(file!(), &test_case(), 2021);
+            end_test();
+        }
         #[test]
         fn cpp_2024() {
             begin_test();

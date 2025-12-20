@@ -8,8 +8,10 @@ extern "C" fn _ffi_fn_empty_struct() {
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_fn_make_pair(x: f32, y: f32) -> *const _ffi_ret_2_f32 {
     let ret = make_pair(x, y);
-    unsafe { _FFI_RET_2_F32 = _ffi_ret_2_f32(ret.x, ret.y) };
-    std::ptr::addr_of!(_FFI_RET_2_F32)
+    unsafe {
+        _FFI_RET_2_F32 = _ffi_ret_2_f32(ret.x, ret.y);
+        std::ptr::addr_of!(_FFI_RET_2_F32)
+    }
 }
 
 #[unsafe(no_mangle)]

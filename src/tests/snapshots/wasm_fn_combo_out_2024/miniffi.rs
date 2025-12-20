@@ -27,8 +27,10 @@ extern "C" fn _ffi_fn_check_combo1() -> *const _ffi_ret_i32_ptr_4_usize {
     let ret_y_len = ret_y.len();
     _ffi_vec__i32_f32_bool_to_js(ret_y, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_I32_PTR_4_USIZE = _ffi_ret_i32_ptr_4_usize(ret_x_0_x, buf_ptr, buf_cap, ret_x_0_y_len, ret_x_1_len, ret_y_len) };
-    std::ptr::addr_of!(_FFI_RET_I32_PTR_4_USIZE)
+    unsafe {
+        _FFI_RET_I32_PTR_4_USIZE = _ffi_ret_i32_ptr_4_usize(ret_x_0_x, buf_ptr, buf_cap, ret_x_0_y_len, ret_x_1_len, ret_y_len);
+        std::ptr::addr_of!(_FFI_RET_I32_PTR_4_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -48,8 +50,10 @@ extern "C" fn _ffi_fn_check_combo2() -> *const _ffi_ret_i32_ptr_4_usize {
     let ret_y_len = ret_y.len();
     _ffi_vec__i32_f32_bool_to_js(ret_y, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
-    unsafe { _FFI_RET_I32_PTR_4_USIZE = _ffi_ret_i32_ptr_4_usize(ret_x_0_x, buf_ptr, buf_cap, ret_x_0_y_len, ret_x_1_len, ret_y_len) };
-    std::ptr::addr_of!(_FFI_RET_I32_PTR_4_USIZE)
+    unsafe {
+        _FFI_RET_I32_PTR_4_USIZE = _ffi_ret_i32_ptr_4_usize(ret_x_0_x, buf_ptr, buf_cap, ret_x_0_y_len, ret_x_1_len, ret_y_len);
+        std::ptr::addr_of!(_FFI_RET_I32_PTR_4_USIZE)
+    }
 }
 
 #[unsafe(no_mangle)]
