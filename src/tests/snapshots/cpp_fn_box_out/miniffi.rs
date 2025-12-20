@@ -76,7 +76,7 @@ struct _ffi_ret_i32_ptr_usize_2_bool(i32, *const u8, usize, bool, bool);
 struct _ffi_ret_ptr_usize(*const u8, usize);
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

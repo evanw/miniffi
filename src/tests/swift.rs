@@ -2,7 +2,8 @@ use super::*;
 use std::borrow::Cow;
 
 pub fn run_test(name: &str, case: &TestCase) {
-    let name = &format!("swift_{}", Path::new(name).file_stem().unwrap().display());
+    let name = Path::new(name).file_stem().unwrap();
+    let name = &format!("swift_{}", name.to_string_lossy());
     let test_dir = &Path::new(".temp").join(name);
     let src_dir = &test_dir.join("src");
     std::fs::create_dir_all(src_dir).expect("failed to create directory `src`");

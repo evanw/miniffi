@@ -249,15 +249,25 @@ impl BuildResult {
     /// This does the following:
     ///
     /// - Write all output files to the file system
-    /// - Print `cargo::rerun-if-changed` lines for all files relevant to the build
+    /// - Print `cargo:rerun-if-changed` lines for all files relevant to the build
     /// - Print `cargo::error` lines for everything in `errors`
-    /// - Print `cargo::warning` lines for everything in `warnings`
+    /// - Print `cargo:warning` lines for everything in `warnings`
     /// - Set `self.finish_on_drop` to `false` to avoid finishing on [`drop`](BuildResult::drop)
     pub fn finish(&mut self) {
-        println!("cargo::rerun-if-changed={}", self.input_path.display());
+        // Note: Cargo changed the directive prefix syntax from "cargo:" to
+        // "cargo::" in version 0.78.0. The older syntax is mostly still
+        // respected, so use it instead for better compatibility. The one
+        // exception is that "cargo::error" was added after this but support
+        // for "cargo:error" was not added. So this deliberately uses
+        // "cargo::error" for errors. Older versions of rust will print an
+        // error message when encountering "cargo::" at all so these will
+        // still print an error.
+        // https://github.com/rust-lang/cargo/commit/d45969a781a78e95215aba19898f397235c36b7c
+        // https://github.com/rust-lang/cargo/commit/4f744776795eb3ccaf46530b0e37056c23641323
+        println!("cargo:rerun-if-changed={}", self.input_path.display());
 
         for file in &mut self.output_files {
-            println!("cargo::rerun-if-changed={}", file.path.display());
+            println!("cargo:rerun-if-changed={}", file.path.display());
             write_file(&file.path, &file.contents, &mut self.errors);
         }
 
@@ -273,12 +283,12 @@ impl BuildResult {
 
         for warning in &self.warnings {
             println!(
-                "cargo::warning=[miniffi] {}",
+                "cargo:warning=[miniffi] {}",
                 warning
                     .to_human_string()
                     .split('\n')
                     .collect::<Vec<_>>()
-                    .join("\ncargo::warning=")
+                    .join("\ncargo:warning=")
             );
         }
 
@@ -381,8 +391,7 @@ impl<T: Compile> Target for T {
             let file = input_file
                 .path
                 .file_name()
-                .unwrap_or(input_file.path.as_os_str())
-                .display();
+                .unwrap_or(input_file.path.as_os_str());
             errors.push(format!("Please add this to the end of {file:?}: {code}"));
         }
 

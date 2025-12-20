@@ -128,7 +128,7 @@ extern "C" fn _ffi_rs_drop_Box_Handler(ptr: *const u8) {
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_string_from_host(ptr: *const u8, len: usize) -> String {
@@ -155,7 +155,7 @@ fn _ffi_vec_TextRun_to_swift(items: Vec<TextRun>, buf: &mut Vec<u8>) {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

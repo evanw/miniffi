@@ -2,7 +2,7 @@
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_buf_from_host(ptr: *const u8, end: *const u8) {
@@ -22,7 +22,7 @@ extern "C" fn _ffi_fn_check_combo(foo_x_0_x: i32, buf_ptr: *const u8, foo_x_0_y_
     }));
     _ffi_buf_from_host(buf_ptr, buf_end);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -32,7 +32,7 @@ extern "C" fn _ffi_fn_rust_mem_leaked() -> usize {
 
 fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {
     let val = unsafe { (*ptr as *const T).read_unaligned() };
-    *ptr = unsafe { ptr.byte_offset(size_of::<T>() as isize) };
+    *ptr = unsafe { ptr.byte_offset(std::mem::size_of::<T>() as isize) };
     val
 }
 

@@ -354,7 +354,11 @@ impl FnBuilder {
     }
 
     pub fn pop_line_if<F: FnOnce(&mut Line) -> bool>(&mut self, predicate: F) -> Option<Line> {
-        self.lines.pop_if(predicate)
+        if predicate(self.lines.last_mut()?) {
+            self.lines.pop()
+        } else {
+            None
+        }
     }
 
     pub fn find(&mut self, name: &str, ty: &RustType, kind: RefKind) -> Decl {
@@ -365,24 +369,27 @@ impl FnBuilder {
             } else {
                 code.clone()
             };
-            Decl { code, pure: true }
-        } else if kind == RefInline
-            && let Some(Line::Decl(last_name, _, last_code)) = self.lines.last()
-            && last_name == name
-        {
-            // This is an rvalue
-            let code = last_code.to_string();
-            self.lines.pop();
-            Decl { code, pure: false }
-        } else {
-            // This is an lvalue
-            let code = if kind == RefStdMove && needs_std_move(ty) {
-                format!("std::move({name})")
-            } else {
-                name.to_string()
-            };
-            Decl { code, pure: false }
+            return Decl { code, pure: true };
         }
+
+        if kind == RefInline {
+            if let Some(Line::Decl(last_name, _, last_code)) = self.lines.last() {
+                if last_name == name {
+                    // This is an rvalue
+                    let code = last_code.to_string();
+                    self.lines.pop();
+                    return Decl { code, pure: false };
+                }
+            }
+        }
+
+        // This is an lvalue
+        let code = if kind == RefStdMove && needs_std_move(ty) {
+            format!("std::move({name})")
+        } else {
+            name.to_string()
+        };
+        Decl { code, pure: false }
     }
 
     pub fn find_args(&mut self, args: &Vec<RustArg>, kind: RefKind) -> String {
@@ -445,8 +452,8 @@ fn maybe_split_across_lines(parts: &[String], mut open: &str, mut close: &str) -
     let is_multi_line = parts.iter().any(|x| x.contains('\n'))
         || parts.iter().map(|x| x.len()).sum::<usize>() > 100;
     if is_multi_line {
-        open = open.trim_ascii_end();
-        close = close.trim_ascii_start();
+        open = open.trim_end();
+        close = close.trim_start();
     }
     let mut result: String = open.into();
     for (i, part) in parts.iter().enumerate() {

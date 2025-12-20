@@ -11,7 +11,7 @@ fn _ffi_buf_to_host(buf: Vec<u8>) -> (*const u8, usize) {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

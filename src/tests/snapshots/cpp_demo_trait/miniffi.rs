@@ -14,7 +14,7 @@ extern "C" fn _ffi_Rc_Trait__get(_self: *const u8) -> i32 {
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_buf_from_host(ptr: *const u8, end: *const u8) {
@@ -61,7 +61,7 @@ extern "C" fn _ffi_fn_test(buf_ptr: *const u8, vec_len: usize) -> _ffi_ret_ptr_2
 
 fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {
     let val = unsafe { (*ptr as *const T).read_unaligned() };
-    *ptr = unsafe { ptr.byte_offset(size_of::<T>() as isize) };
+    *ptr = unsafe { ptr.byte_offset(std::mem::size_of::<T>() as isize) };
     val
 }
 
@@ -175,7 +175,7 @@ fn _ffi_vec_rc_dyn_Trait_to_cpp(items: Vec<std::rc::Rc<dyn Trait>>, buf: &mut Ve
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

@@ -86,7 +86,7 @@ impl Drop for _ffi_rs_Window {
 impl Window for _ffi_rs_Window {
     fn get_title(&self) -> String {
         unsafe extern "C" { fn _ffi_js_Window__get_title(_: *const u8, _: *const _ffi_ret_ptr_usize); }
-        unsafe { _ffi_js_Window__get_title(self.0, &raw const _FFI_RET_PTR_USIZE) }
+        unsafe { _ffi_js_Window__get_title(self.0, std::ptr::addr_of!(_FFI_RET_PTR_USIZE)) }
         let ret_ptr = unsafe { _FFI_RET_PTR_USIZE.0 };
         let ret_len = unsafe { _FFI_RET_PTR_USIZE.1 };
         _ffi_string_from_host(ret_ptr, ret_len)
@@ -100,7 +100,7 @@ impl Window for _ffi_rs_Window {
 
     fn get_size(&self) -> (i32, i32) {
         unsafe extern "C" { fn _ffi_js_Window__get_size(_: *const u8, _: *const _ffi_ret_2_i32); }
-        unsafe { _ffi_js_Window__get_size(self.0, &raw const _FFI_RET_2_I32) }
+        unsafe { _ffi_js_Window__get_size(self.0, std::ptr::addr_of!(_FFI_RET_2_I32)) }
         let ret_0 = unsafe { _FFI_RET_2_I32.0 };
         let ret_1 = unsafe { _FFI_RET_2_I32.1 };
         (ret_0, ret_1)
@@ -130,7 +130,7 @@ extern "C" fn _ffi_rs_drop_Box_Handler(ptr: *const u8) {
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_string_from_host(ptr: *const u8, len: usize) -> String {
@@ -157,7 +157,7 @@ fn _ffi_vec_TextRun_to_js(items: Vec<TextRun>, buf: &mut Vec<u8>) {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

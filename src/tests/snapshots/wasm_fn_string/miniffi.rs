@@ -4,7 +4,7 @@
 extern "C" fn _ffi_fn_get_string() -> *const _ffi_ret_ptr_2_usize {
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(get_string());
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -38,7 +38,7 @@ static mut _FFI_RET_PTR_2_USIZE: _ffi_ret_ptr_2_usize = _ffi_ret_ptr_2_usize(std
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_string_from_host(ptr: *const u8, len: usize) -> String {

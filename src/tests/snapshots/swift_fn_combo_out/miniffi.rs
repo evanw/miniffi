@@ -91,7 +91,7 @@ fn _ffi_vec__i32_f32_bool_to_swift(items: Vec<((), (i32,), (f32, bool))>, buf: &
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

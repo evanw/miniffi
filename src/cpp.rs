@@ -1354,14 +1354,14 @@ fn generate_operator_eq(
                 } else {
                     source_deps.insert((SourceGroup::Include, "<algorithm>".into())); // For "std::equal"
                     let a = if a.starts_with('*') {
-                        &format!("({a})")
+                        Cow::Owned(format!("({a})"))
                     } else {
-                        a
+                        Cow::Borrowed(a)
                     };
                     let b = if b.starts_with('*') {
-                        &format!("({b})")
+                        Cow::Owned(format!("({b})"))
                     } else {
-                        b
+                        Cow::Borrowed(b)
                     };
                     format!(
                         "std::equal({a}.begin(), {a}.end(), {b}.begin(), {b}.end(), \

@@ -5,7 +5,7 @@ extern "C" fn _ffi_Rc_Test__get_string(_self: *const u8) -> *const _ffi_ret_ptr_
     let _self = unsafe { &*(_self as *const std::rc::Rc<dyn Test>) };
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(_self.get_string());
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -34,7 +34,7 @@ extern "C" fn _ffi_fn_rust_mem_leaked() -> usize {
 extern "C" fn _ffi_fn_set_test(test_ptr: *const u8) -> *const _ffi_ret_ptr_2_usize {
     let (ret_ptr, ret_len, ret_cap) = _ffi_string_to_host(set_test(std::rc::Rc::new(_ffi_rs_Test(test_ptr))));
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(ret_ptr, ret_len, ret_cap) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[repr(C)]
@@ -58,7 +58,7 @@ impl Drop for _ffi_rs_Test {
 impl Test for _ffi_rs_Test {
     fn get_string(&self) -> String {
         unsafe extern "C" { fn _ffi_js_Test__get_string(_: *const u8, _: *const _ffi_ret_ptr_usize); }
-        unsafe { _ffi_js_Test__get_string(self.0, &raw const _FFI_RET_PTR_USIZE) }
+        unsafe { _ffi_js_Test__get_string(self.0, std::ptr::addr_of!(_FFI_RET_PTR_USIZE)) }
         let ret_ptr = unsafe { _FFI_RET_PTR_USIZE.0 };
         let ret_len = unsafe { _FFI_RET_PTR_USIZE.1 };
         _ffi_string_from_host(ret_ptr, ret_len)
@@ -84,7 +84,7 @@ extern "C" fn _ffi_rs_drop_Rc_Test(ptr: *const u8) {
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_string_from_host(ptr: *const u8, len: usize) -> String {

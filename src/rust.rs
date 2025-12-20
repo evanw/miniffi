@@ -224,7 +224,7 @@ pub fn add_common_rust_helpers(helpers: &mut HelperSet<(), String>) {
         r"
 fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {
     let val = unsafe { (*ptr as *const T).read_unaligned() };
-    *ptr = unsafe { ptr.byte_offset(size_of::<T>() as isize) };
+    *ptr = unsafe { ptr.byte_offset(std::mem::size_of::<T>() as isize) };
     val
 }
 ",
@@ -234,7 +234,7 @@ fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {
         "_ffi_write",
         r"
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }
@@ -246,7 +246,7 @@ fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
         r#"
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 "#,
     );

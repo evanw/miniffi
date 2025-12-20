@@ -7,7 +7,7 @@ fn _ffi_box_Foo_from_swift(end: &mut *const u8) -> Box<Foo> {
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_buf_from_host(ptr: *const u8, end: *const u8) {
@@ -17,7 +17,7 @@ fn _ffi_buf_from_host(ptr: *const u8, end: *const u8) {
 
 fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {
     let val = unsafe { (*ptr as *const T).read_unaligned() };
-    *ptr = unsafe { ptr.byte_offset(size_of::<T>() as isize) };
+    *ptr = unsafe { ptr.byte_offset(std::mem::size_of::<T>() as isize) };
     val
 }
 

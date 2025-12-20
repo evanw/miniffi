@@ -1077,7 +1077,7 @@ fn generate_js_to_rust_fn(
                 let (ty_name, static_name) = multi_ret_helper(ast, ctx, &ret_tfm.ffi_args);
                 let args = fb.find_args(&ret_tfm.ffi_args, RefInline);
                 fb.line(format!("unsafe {{ {static_name} = {ty_name}({args}) }};"));
-                fb.line(format!("&raw const {static_name}"));
+                fb.line(format!("std::ptr::addr_of!({static_name})"));
             }
         }
 
@@ -1163,7 +1163,7 @@ fn generate_rust_to_js_fn(
     rust_call.push_str(&arg_tfm.rust.find_args(&arg_tfm.ffi_args, RefInline));
     if ret_tfm.ffi_args.len() > 1 {
         let (_, static_name) = multi_ret_helper(ast, ctx, &ret_tfm.ffi_args);
-        _ = write!(rust_call, ", &raw const {static_name}");
+        _ = write!(rust_call, ", std::ptr::addr_of!({static_name})");
     }
     rust_call.push_str(") }");
 

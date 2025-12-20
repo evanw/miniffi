@@ -1,6 +1,6 @@
 use super::*;
 use std::process::{Command, Output};
-use std::sync::{LazyLock, Mutex};
+use std::sync::{Mutex, OnceLock};
 
 mod cases;
 mod cpp;
@@ -118,20 +118,24 @@ enum Expr {
 }
 use Expr::*;
 
-static COUNTER: LazyLock<Mutex<usize>> = LazyLock::new(|| Mutex::new(0));
+static COUNTER: OnceLock<Mutex<usize>> = OnceLock::new();
+
+fn counter() -> &'static Mutex<usize> {
+    COUNTER.get_or_init(|| Mutex::new(0))
+}
 
 fn begin_test() {
-    let mut counter = COUNTER.lock().unwrap();
+    let mut counter = counter().lock().unwrap();
     *counter += 1;
 }
 
 fn end_test() {
-    let mut counter = COUNTER.lock().unwrap();
+    let mut counter = counter().lock().unwrap();
     *counter -= 1;
 
     // Clean up after the last test (intentionally done while the lock is held)
     if *counter == 0 {
-        let test_dir = &std::path::absolute(".temp").unwrap();
+        let test_dir = &PathBuf::from(".temp");
         if let Ok(entries) = std::fs::read_dir(test_dir) {
             for entry in entries {
                 let name = entry.unwrap().file_name();
@@ -212,42 +216,42 @@ fn copy_snapshot(name: &str, from: PathBuf) {
 
 fn rust_leak_check() -> &'static str {
     // Test with "cargo +nightly test" to get memory leak checks
-    if let Ok(toolchain) = std::env::var("RUSTUP_TOOLCHAIN")
-        && toolchain.contains("nightly")
-    {
-        r#"
-        #![feature(allocator_api)]
-        struct LeakCheckAlloc;
+    if let Ok(toolchain) = std::env::var("RUSTUP_TOOLCHAIN") {
+        if toolchain.contains("nightly") {
+            return r#"
+            #![feature(allocator_api)]
+            struct LeakCheckAlloc;
 
-        unsafe impl std::alloc::GlobalAlloc for LeakCheckAlloc {
-            unsafe fn alloc(&self, layout: std::alloc::Layout) -> *mut u8 {
-                unsafe {
-                    TOTAL_MEMORY += layout.size();
-                    std::alloc::System.alloc(layout)
+            unsafe impl std::alloc::GlobalAlloc for LeakCheckAlloc {
+                unsafe fn alloc(&self, layout: std::alloc::Layout) -> *mut u8 {
+                    unsafe {
+                        TOTAL_MEMORY += layout.size();
+                        std::alloc::System.alloc(layout)
+                    }
+                }
+
+                unsafe fn dealloc(&self, ptr: *mut u8, layout: std::alloc::Layout) {
+                    unsafe {
+                        TOTAL_MEMORY -= layout.size();
+                        std::alloc::System.dealloc(ptr, layout);
+                    }
                 }
             }
 
-            unsafe fn dealloc(&self, ptr: *mut u8, layout: std::alloc::Layout) {
-                unsafe {
-                    TOTAL_MEMORY -= layout.size();
-                    std::alloc::System.dealloc(ptr, layout);
-                }
+            #[global_allocator]
+            static ALLOCATOR: LeakCheckAlloc = LeakCheckAlloc;
+            static mut TOTAL_MEMORY: usize = 0;
+
+            pub fn rust_mem_leaked() -> usize {
+                unsafe { TOTAL_MEMORY }
             }
+            "#;
         }
-
-        #[global_allocator]
-        static ALLOCATOR: LeakCheckAlloc = LeakCheckAlloc;
-        static mut TOTAL_MEMORY: usize = 0;
-
-        pub fn rust_mem_leaked() -> usize {
-            unsafe { TOTAL_MEMORY }
-        }
-        "#
-    } else {
-        r#"
-        pub fn rust_mem_leaked() -> usize {
-            0
-        }
-        "#
     }
+
+    r#"
+    pub fn rust_mem_leaked() -> usize {
+        0
+    }
+    "#
 }

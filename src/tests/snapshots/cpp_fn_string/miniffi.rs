@@ -36,7 +36,7 @@ struct _ffi_ret_ptr_2_usize(*const u8, usize, usize);
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_string_from_host(ptr: *const u8, len: usize) -> String {

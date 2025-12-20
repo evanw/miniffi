@@ -85,7 +85,7 @@ fn _ffi_box_vec_i32_to_js(val: Vec<i32>, buf: &mut Vec<u8>) {
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_buf_from_host(ptr: *const u8, end: *const u8) {
@@ -105,7 +105,7 @@ fn _ffi_buf_to_host(buf: Vec<u8>) -> (*const u8, usize) {
 
 fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {
     let val = unsafe { (*ptr as *const T).read_unaligned() };
-    *ptr = unsafe { ptr.byte_offset(size_of::<T>() as isize) };
+    *ptr = unsafe { ptr.byte_offset(std::mem::size_of::<T>() as isize) };
     val
 }
 
@@ -120,7 +120,7 @@ fn _ffi_enum_EnumBoxTup_from_js(end: &mut *const u8) -> EnumBoxTup {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }
@@ -207,7 +207,7 @@ extern "C" fn _ffi_fn_box_opt(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usize {
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -219,7 +219,7 @@ extern "C" fn _ffi_fn_box_opt_box(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usi
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -231,7 +231,7 @@ extern "C" fn _ffi_fn_box_tup_0(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usize
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -243,7 +243,7 @@ extern "C" fn _ffi_fn_box_tup_1(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usize
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -255,7 +255,7 @@ extern "C" fn _ffi_fn_box_tup_2(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usize
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -267,7 +267,7 @@ extern "C" fn _ffi_fn_box_vec(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usize {
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -279,7 +279,7 @@ extern "C" fn _ffi_fn_box_vec_box(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usi
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -300,7 +300,7 @@ extern "C" fn _ffi_fn_enum_box_tup(buf_ptr: *const u8) -> *const _ffi_ret_ptr_us
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -311,7 +311,7 @@ extern "C" fn _ffi_fn_enum_opt_tup(buf_ptr: *const u8) -> *const _ffi_ret_ptr_us
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -322,7 +322,7 @@ extern "C" fn _ffi_fn_enum_vec_tup(buf_ptr: *const u8) -> *const _ffi_ret_ptr_us
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -338,7 +338,7 @@ extern "C" fn _ffi_fn_opt_box(buf_ptr: *const u8, has_x_0: bool) -> *const _ffi_
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr2, buf_cap, has_ret_0) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -354,7 +354,7 @@ extern "C" fn _ffi_fn_opt_box_opt(buf_ptr: *const u8, has_x_0: bool) -> *const _
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr2, buf_cap, has_ret_0) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -370,7 +370,7 @@ extern "C" fn _ffi_fn_opt_tup_0(buf_ptr: *const u8, has_x_0: bool) -> *const _ff
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr2, buf_cap, has_ret_0) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -386,7 +386,7 @@ extern "C" fn _ffi_fn_opt_tup_1(buf_ptr: *const u8, has_x_0: bool) -> *const _ff
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr2, buf_cap, has_ret_0) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -403,7 +403,7 @@ extern "C" fn _ffi_fn_opt_tup_2(buf_ptr: *const u8, has_x_0: bool) -> *const _ff
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr2, buf_cap, has_ret_0) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -422,7 +422,7 @@ extern "C" fn _ffi_fn_tup_box(buf_ptr: *const u8) -> *const _ffi_ret_ptr_usize {
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr2, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -436,7 +436,7 @@ extern "C" fn _ffi_fn_vec_box(buf_ptr: *const u8, x_0_len: usize) -> *const _ffi
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr2, buf_cap, ret_0_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -450,7 +450,7 @@ extern "C" fn _ffi_fn_vec_box_vec(buf_ptr: *const u8, x_0_len: usize) -> *const 
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr2, buf_cap, ret_0_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -464,7 +464,7 @@ extern "C" fn _ffi_fn_vec_tup_0(buf_ptr: *const u8, x_0_len: usize) -> *const _f
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr2, buf_cap, ret_0_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -478,7 +478,7 @@ extern "C" fn _ffi_fn_vec_tup_1(buf_ptr: *const u8, x_0_len: usize) -> *const _f
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr2, buf_cap, ret_0_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -492,7 +492,7 @@ extern "C" fn _ffi_fn_vec_tup_2(buf_ptr: *const u8, x_0_len: usize) -> *const _f
     _ffi_buf_from_host(buf_ptr, buf_end);
     let (buf_ptr2, buf_cap) = _ffi_buf_to_host(buf2);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr2, buf_cap, ret_0_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[repr(C)]

@@ -16,8 +16,16 @@ fn test_case() -> TestCase {
         pub fn sum_isize(values: Vec<isize>) -> isize { values.iter().sum() }
         pub fn sum_i64(values: Vec<i64>) -> i64 { values.iter().sum() }
 
-        pub fn sum_f32(values: Vec<f32>) -> f32 { values.iter().sum() }
-        pub fn sum_f64(values: Vec<f64>) -> f64 { values.iter().sum() }
+        // Note: Rust changed how "sum()" behaves in version 1.82.0. It used
+        // to return +0.0 when empty but now returns -0.0. Detect this case and
+        // deliberately always return -0.0 to make this pass with older Rust.
+        // https://github.com/rust-lang/rust/commit/490818851860fb257e23fe7aa0ee32eaffc4ba40
+        pub fn sum_f32(values: Vec<f32>) -> f32 {
+            if values.is_empty() { -0.0 } else { values.iter().sum() }
+        }
+        pub fn sum_f64(values: Vec<f64>) -> f64 {
+            if values.is_empty() { -0.0 } else { values.iter().sum() }
+        }
 
         pub fn check_nested(values: Vec<Vec<i32>>) -> String {
             format!("{values:?}")

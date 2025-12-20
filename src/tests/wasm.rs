@@ -1,8 +1,9 @@
 use super::*;
 
 pub fn run_test(name: &str, case: &TestCase) {
-    let name = &format!("wasm_{}", Path::new(name).file_stem().unwrap().display());
-    let test_dir = &std::path::absolute(".temp").unwrap().join(name);
+    let name = Path::new(name).file_stem().unwrap();
+    let name = &format!("wasm_{}", name.to_string_lossy());
+    let test_dir = &std::env::current_dir().unwrap().join(".temp").join(name);
     let src_dir = &test_dir.join("src");
     let pkg_json_dir = &test_dir.join("..");
     let tsc_path = &pkg_json_dir
@@ -22,7 +23,7 @@ pub fn run_test(name: &str, case: &TestCase) {
     let checks = checks.iter().map(to_str).collect::<Vec<_>>().join(";\n");
 
     // Install TypeScript for type checking
-    if !std::fs::exists(tsc_path).unwrap_or(false) {
+    if !tsc_path.exists() {
         std::fs::write(pkg_json_dir.join("package.json"), "{}")
             .expect("failed to write file `package.json`");
         check_output(

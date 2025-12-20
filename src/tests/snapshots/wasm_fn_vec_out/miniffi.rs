@@ -18,7 +18,7 @@ extern "C" fn _ffi_fn_check_nested() -> *const _ffi_ret_ptr_2_usize {
     _ffi_vec_vec_i32_to_js(ret, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr, buf_cap, ret_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -29,7 +29,7 @@ extern "C" fn _ffi_fn_get_vec(n: i32) -> *const _ffi_ret_ptr_2_usize {
     _ffi_vec_i32_to_js(ret, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr, buf_cap, ret_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[unsafe(no_mangle)]
@@ -55,7 +55,7 @@ fn _ffi_vec_vec_i32_to_js(items: Vec<Vec<i32>>, buf: &mut Vec<u8>) {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

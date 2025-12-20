@@ -20,7 +20,7 @@ extern "C" fn _ffi_fn_opt_int(x: bool, y: i32) -> *const _ffi_ret_ptr_usize_bool
     }
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -36,7 +36,7 @@ extern "C" fn _ffi_fn_opt_opt_int(x: bool, y: bool, z: i32) -> *const _ffi_ret_p
     }
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -50,7 +50,7 @@ extern "C" fn _ffi_fn_opt_vec_opt_string(n: i32) -> *const _ffi_ret_ptr_usize_bo
     }
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
     unsafe { _FFI_RET_PTR_USIZE_BOOL = _ffi_ret_ptr_usize_bool(buf_ptr, buf_cap, has_ret) };
-    &raw const _FFI_RET_PTR_USIZE_BOOL
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE_BOOL)
 }
 
 #[unsafe(no_mangle)]
@@ -66,7 +66,7 @@ extern "C" fn _ffi_fn_vec_opt_int(n: i32) -> *const _ffi_ret_ptr_2_usize {
     _ffi_vec_option_i32_to_js(ret, &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
     unsafe { _FFI_RET_PTR_2_USIZE = _ffi_ret_ptr_2_usize(buf_ptr, buf_cap, ret_len) };
-    &raw const _FFI_RET_PTR_2_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_2_USIZE)
 }
 
 #[repr(C)]
@@ -104,7 +104,7 @@ fn _ffi_vec_option_string_to_js(items: Vec<Option<String>>, buf: &mut Vec<u8>) {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }

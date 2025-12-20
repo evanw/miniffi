@@ -11,7 +11,7 @@ fn _ffi_buf_to_host(buf: Vec<u8>) -> (*const u8, usize) {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }
@@ -67,7 +67,7 @@ extern "C" fn _ffi_fn_long_out() -> *const _ffi_ret_ptr_usize {
     _ffi_enum_LongEnum_to_js(long_out(), &mut buf);
     let (buf_ptr, buf_cap) = _ffi_buf_to_host(buf);
     unsafe { _FFI_RET_PTR_USIZE = _ffi_ret_ptr_usize(buf_ptr, buf_cap) };
-    &raw const _FFI_RET_PTR_USIZE
+    std::ptr::addr_of!(_FFI_RET_PTR_USIZE)
 }
 
 #[unsafe(no_mangle)]

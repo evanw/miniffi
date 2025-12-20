@@ -17,7 +17,7 @@ extern "C" fn _ffi_fn_test(x: i32) -> *const _ffi_ret_i32_ptr {
     let ret_0 = ret.0;
     let ret_1 = ret.1;
     unsafe { _FFI_RET_I32_PTR = _ffi_ret_i32_ptr(ret_0, Box::into_raw(Box::new(ret_1.ptr)) as *const u8) };
-    &raw const _FFI_RET_I32_PTR
+    std::ptr::addr_of!(_FFI_RET_I32_PTR)
 }
 
 #[repr(C)]

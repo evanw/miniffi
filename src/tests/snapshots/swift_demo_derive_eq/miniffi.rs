@@ -85,7 +85,7 @@ fn _ffi_box_vec_i32_to_swift(val: Vec<i32>, buf: &mut Vec<u8>) {
 
 #[unsafe(no_mangle)]
 extern "C" fn _ffi_alloc(len: usize) -> *const u8 {
-    Box::into_raw(Box::<[u8]>::new_uninit_slice(len)) as *const u8
+    Box::into_raw([0 as u8].repeat(len).into_boxed_slice()) as *const u8
 }
 
 fn _ffi_buf_from_host(ptr: *const u8, end: *const u8) {
@@ -105,7 +105,7 @@ fn _ffi_buf_to_host(buf: Vec<u8>) -> (*const u8, usize) {
 
 fn _ffi_read<T: Copy>(ptr: &mut *const u8) -> T {
     let val = unsafe { (*ptr as *const T).read_unaligned() };
-    *ptr = unsafe { ptr.byte_offset(size_of::<T>() as isize) };
+    *ptr = unsafe { ptr.byte_offset(std::mem::size_of::<T>() as isize) };
     val
 }
 
@@ -120,7 +120,7 @@ fn _ffi_enum_EnumBoxTup_from_swift(end: &mut *const u8) -> EnumBoxTup {
 }
 
 fn _ffi_write<T: Copy>(val: T, buf: &mut Vec<u8>) {
-    let ptr = &raw const val as *const u8;
+    let ptr = std::ptr::addr_of!(val) as *const u8;
     let len = std::mem::size_of::<T>();
     buf.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
 }
